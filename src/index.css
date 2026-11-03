@@ -1,0 +1,296 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------- Brand tokens (Matchlight_Brand.md section 4) ---------- */
+:root {
+  --ink: #0e0e0c;
+  --char: #1c1b19;
+  --bone: #f5f2ec;
+  --smoke: #e6e1d8;
+  --ember: #ff5a1f;
+  --ember-deep: #b8360a;
+  --flare: #ffb547;
+  --ash: #8a857c;
+  --slate: #5e5a53;
+  --line: rgba(245, 242, 236, 0.08);
+  --strike: linear-gradient(90deg, transparent 0%, var(--ember) 70%, var(--flare) 100%);
+  --ease-prisma: cubic-bezier(0.16, 1, 0.3, 1);
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    background: var(--ink);
+    color: var(--bone);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  body {
+    @apply font-sans text-body;
+    background: var(--ink);
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--ember);
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--ember);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+  /* Hide the hero while the strike preloader decides; avoids a flash on first paint. */
+  html.is-striking body {
+    overflow: hidden;
+  }
+}
+
+@layer components {
+  .label {
+    @apply font-mono text-label uppercase;
+  }
+  .accent {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--ember);
+    letter-spacing: -0.01em;
+  }
+  .wrap {
+    @apply mx-auto w-full max-w-site px-4 md:px-6;
+  }
+  .section-pad {
+    @apply py-24 md:py-40;
+  }
+
+  /* The strike line: transparent to Ember to Flare. */
+  .strike-line {
+    height: 1px;
+    background: var(--strike);
+    transform-origin: left center;
+  }
+
+  /* Links: strike-line underline drawn left to right on hover. */
+  .link-strike {
+    position: relative;
+    display: inline-block;
+  }
+  .link-strike::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -3px;
+    height: 1px;
+    background: var(--strike);
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 400ms var(--ease-prisma);
+  }
+  .link-strike:hover::after,
+  .link-strike:focus-visible::after {
+    transform: scaleX(1);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center gap-2 rounded-full bg-ember font-medium text-ink;
+    padding: 6px 6px 6px 24px;
+    transition: gap 300ms var(--ease-prisma), box-shadow 300ms var(--ease-prisma);
+  }
+  .btn-primary:hover {
+    gap: 12px;
+    box-shadow: 0 0 0 1px rgba(255, 181, 71, 0.4), 0 0 36px rgba(255, 181, 71, 0.45);
+  }
+  .btn-primary .chip {
+    @apply grid h-10 w-10 place-items-center rounded-full bg-ink text-bone;
+    transition: transform 300ms var(--ease-prisma);
+  }
+  .btn-primary:hover .chip {
+    transform: scale(1.1);
+  }
+  .btn-secondary {
+    @apply inline-flex items-center rounded-full border border-bone/90 px-6 font-medium text-bone;
+    height: 52px;
+    transition: border-color 250ms ease, color 250ms ease;
+  }
+  .btn-secondary:hover {
+    border-color: var(--ember);
+  }
+
+  .card {
+    background: var(--char);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+  }
+}
+
+@layer utilities {
+  /* SVG fractal noise (from prisma-landing). Used for the global grain. */
+  .noise-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .split-char {
+    display: inline-block;
+    will-change: transform, opacity;
+  }
+  .sr-only-focusable:not(:focus) {
+    @apply sr-only;
+  }
+}
+
+/* Global grain at ~3.5% over everything dark. */
+.grain {
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+}
+
+/* Custom cursor only on fine pointers. */
+@media (hover: hover) and (pointer: fine) {
+  html.has-cursor,
+  html.has-cursor a,
+  html.has-cursor button {
+    cursor: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+  .link-strike::after {
+    transition: none;
+  }
+}
+
+/* Marquee for the proof strip */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 48s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* Mobile hero: CSS ember glow + rising sparks (replaces the WebGL field). */
+.ember-glow .glow-a,
+.ember-glow .glow-b {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(40px);
+  will-change: transform;
+}
+.ember-glow .glow-a {
+  width: 70vw;
+  height: 70vw;
+  right: -20vw;
+  top: 30%;
+  background: radial-gradient(circle, rgba(255, 90, 31, 0.35), transparent 70%);
+  animation: glow-drift 9s ease-in-out infinite alternate;
+}
+.ember-glow .glow-b {
+  width: 50vw;
+  height: 50vw;
+  left: -10vw;
+  top: 10%;
+  background: radial-gradient(circle, rgba(255, 181, 71, 0.14), transparent 70%);
+  animation: glow-drift 12s ease-in-out infinite alternate-reverse;
+}
+.ember-glow i {
+  position: absolute;
+  bottom: -8px;
+  width: 3px;
+  height: 3px;
+  border-radius: 9999px;
+  background: var(--flare);
+  box-shadow: 0 0 6px 1px rgba(255, 90, 31, 0.7);
+  opacity: 0;
+  animation: spark-rise 6s linear infinite;
+}
+@keyframes glow-drift {
+  to {
+    transform: translate3d(-8vw, -6vh, 0) scale(1.15);
+  }
+}
+@keyframes spark-rise {
+  0% { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 0.9; }
+  100% { transform: translate3d(14px, -85vh, 0); opacity: 0; }
+}
+
+/* ---------- Hero: old world (mechanical, same pace forever) ---------- */
+.old-row {
+  animation-name: old-march;
+  animation-timing-function: steps(24, end);
+  animation-iteration-count: infinite;
+}
+@keyframes old-march {
+  to {
+    transform: translateX(-33.333%);
+  }
+}
+
+/* ---------- Hero: new world (alive) ---------- */
+.graph-edge {
+  stroke-dasharray: 600;
+  stroke-dashoffset: 600;
+  animation: edge-draw 4.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes edge-draw {
+  0% { stroke-dashoffset: 600; opacity: 0; }
+  15% { opacity: 1; }
+  60% { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0.15; }
+}
+.graph-node {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: node-pulse 2.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 6px rgba(255, 181, 71, 0.9));
+}
+@keyframes node-pulse {
+  0%, 100% { transform: scale(0.7); opacity: 0.6; }
+  50% { transform: scale(1.4); opacity: 1; }
+}
+.new-bar {
+  height: 30%;
+  animation: bar-live 1.4s ease-in-out infinite alternate;
+}
+@keyframes bar-live {
+  to { height: 100%; }
+}
+.new-meter {
+  width: 20%;
+  animation: meter-fill 5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes meter-fill {
+  0% { width: 18%; }
+  55%, 100% { width: 78%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .new-meter { width: 78%; }
+  .graph-edge { stroke-dashoffset: 0; }
+}

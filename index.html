@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Matchlight · We build what replaces L&amp;D</title>
+    <meta name="description" content="Matchlight builds what replaces L&amp;D. Custom capability builds, ready-to-run courses, and open programs. Learning isn't the product. Capability is." />
+    <meta name="theme-color" content="#0E0E0C" />
+    <meta property="og:title" content="Matchlight" />
+    <meta property="og:description" content="L&amp;D as you know it is over. We build what replaces it." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="preconnect" href="https://d8j0ntlcm91z4.cloudfront.net" crossorigin />
+    <!-- Brand fonts, self-hosted (SIL OFL). Latin subset. -->
+    <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/instrument-serif-italic-latin.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      @font-face { font-family: 'Geist'; font-style: normal; font-weight: 400 600; font-display: swap; src: url(/fonts/geist-latin.woff2) format('woff2'); }
+      @font-face { font-family: 'Geist Mono'; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/geist-mono-latin-500.woff2) format('woff2'); }
+      @font-face { font-family: 'Instrument Serif'; font-style: italic; font-weight: 400; font-display: swap; src: url(/fonts/instrument-serif-italic-latin.woff2) format('woff2'); }
+      html, body { background: #0E0E0C; }
+    </style>
+    <script>
+      // Decide preloader before first paint so there is no flash of the hero on repeat visits.
+      (function () {
+        try {
+          var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+          var seen = sessionStorage.getItem('ml-struck') === '1';
+          if (!rm && !seen) document.documentElement.classList.add('is-striking');
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>
+      <main style="padding:48px;font-family:system-ui;color:#F5F2EC;background:#0E0E0C;min-height:100vh">
+        <h1>L&amp;D as you know it is over. We build what replaces it.</h1>
+        <p>Learning isn't the product. Capability is.</p>
+      </main>
+    </noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
