@@ -27,6 +27,8 @@
 }
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+.choices.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 720px) { .choices.two { grid-template-columns: minmax(0, 1fr); } }
 body { background: var(--paper); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
 .wrap { max-width: 1200px; margin: 0 auto; padding-block: 36px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
@@ -162,7 +164,7 @@ body.meet aside.quote { position: static; order: -1; }
         <!-- 1 -->
         <section class="card" data-step="0">
           <h2>Client and delivery</h2>
-          <p class="hint">Where the experience lives decides what runs after launch.</p>
+          <p class="hint">Where it lives, and whose accounts and API keys it runs on.</p>
           <div class="stack">
             <div class="row"><label for="client">Client name</label><input id="client" type="text" value="" placeholder="Client name"></div>
             <div class="row"><label for="project">Project<small>Shown on the quote</small></label><input id="project" type="text" value="" placeholder="Project name"></div>
@@ -170,7 +172,12 @@ body.meet aside.quote { position: static; order: -1; }
           <div class="choices" role="radiogroup" aria-label="Delivery">
             <label class="choice"><input type="radio" name="delivery" value="scorm"><b>SCORM package</b><span>Runs inside the client's LMS. We hand over files. No hosting.</span></label>
             <label class="choice"><input type="radio" name="delivery" value="scormai"><b>SCORM with AI</b><span>Runs in their LMS, but calls our AI service for voice, avatar or coaching.</span></label>
-            <label class="choice"><input type="radio" name="delivery" value="hosted"><b>Hosted by Matchlight</b><span>We host the experience on the web, with links or SSO.</span></label>
+            <label class="choice"><input type="radio" name="delivery" value="hosted"><b>Hosted web app</b><span>Runs on the web with links or SSO, on our hosting or theirs.</span></label>
+          </div>
+          <p class="mono" style="margin-top:22px">Accounts and ownership</p>
+          <div class="choices two" style="margin-top:10px" role="radiogroup" aria-label="Accounts and ownership">
+            <label class="choice"><input type="radio" name="own" value="managed" checked><b>Matchlight accounts</b><span>We build and run it on our accounts and API keys. Hosting, AI credits and analytics roll into one ongoing fee.</span></label>
+            <label class="choice"><input type="radio" name="own" value="handover"><b>Client's API keys, files handed over</b><span>The client gives us their API keys before the build and pays vendors directly. At the end they receive the repositories, source files and setup guide.</span></label>
           </div>
         </section>
 
@@ -198,12 +205,9 @@ body.meet aside.quote { position: static; order: -1; }
 
         <!-- 4 -->
         <section class="card" data-step="3" hidden>
-          <h2>After launch</h2>
-          <p class="hint">Whose accounts the AI and hosting run on, and who pays the vendors.</p>
-          <div class="choices" role="radiogroup" aria-label="Ownership after launch" style="grid-template-columns:repeat(2,minmax(0,1fr))">
-            <label class="choice"><input type="radio" name="own" value="managed" checked><b>We run it</b><span>Built and run on Matchlight accounts. Hosting, AI credits and analytics roll into one ongoing fee.</span></label>
-            <label class="choice"><input type="radio" name="own" value="handover"><b>Client's keys, handed over</b><span>The client provides their own API keys before the build and pays vendors directly from day one. At the end they get the repositories, source files and setup guide.</span></label>
-          </div>
+          <h2>Ongoing services</h2>
+          <p class="hint">Support, analytics and billing. Accounts and ownership are set in step 1.</p>
+
           <div class="stack">
             <div class="row"><label for="maint" id="maintLabel">Maintenance plan</label>
               <select id="maint">
