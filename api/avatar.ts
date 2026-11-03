@@ -11,6 +11,9 @@ const ALLOWED_ORIGINS = [/^https:\/\/matchlight[\w-]*\.vercel\.app$/, /^https:\/
 
 // Mia's voice in Anam.
 const DEFAULT_VOICE_ID = '8cc80a30-4fc0-11f1-84b0-52bacf74fa75';
+// Anam's standard hosted LLM. A full persona (avatar, voice, LLM, prompt) is what makes
+// Anam issue an ephemeral token; without an LLM it issues a legacy token the SDK rejects.
+const DEFAULT_LLM_ID = '0934d97d-0c3a-4f33-91b0-5e136a0ef466';
 
 const PERSONA = 'Guarded but professional. Tired. Hoping this is quick.';
 
@@ -38,6 +41,15 @@ This is a spoken video call. Reply in one to three short sentences, the way a re
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
+function tokenType(token: string): string {
+  try {
+    const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('utf8')) as { type?: string };
+    return (payload.type ?? '').toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
 export async function POST(request: Request) {
   const origin = request.headers.get('origin') ?? '';
   if (origin && !ALLOWED_ORIGINS.some((r) => r.test(origin))) return json({ error: 'forbidden' }, 403);
@@ -54,7 +66,7 @@ export async function POST(request: Request) {
     maxSessionLengthSeconds: 660,
     directorNotes: { presetStyle: 'sad', expressivity: 0.35 },
   };
-  if (process.env.ANAM_LLM_ID) personaConfig.llmId = process.env.ANAM_LLM_ID;
+  personaConfig.llmId = process.env.ANAM_LLM_ID || DEFAULT_LLM_ID;
 
   try {
     const res = await fetch('https://api.anam.ai/v1/auth/session-token', {
@@ -69,7 +81,13 @@ export async function POST(request: Request) {
     }
     const data = (await res.json()) as { sessionToken?: string };
     if (!data.sessionToken) return json({ error: 'upstream' }, 502);
-    console.log('anam session-token ok');
+    // The browser SDK refuses legacy tokens; catch that here with a clear reason.
+    const type = tokenType(data.sessionToken);
+    if (type === 'legacy') {
+      console.error('anam issued a legacy token; persona config not accepted', Object.keys(personaConfig));
+      return json({ error: 'legacy_token', detail: 'Anam did not accept the persona config (check ANAM_LLM_ID, ANAM_AVATAR_ID, ANAM_VOICE_ID)' }, 502);
+    }
+    console.log('anam session-token ok', tokenType(data.sessionToken));
     return json({ sessionToken: data.sessionToken });
   } catch (e) {
     console.error('anam session-token error', e);
