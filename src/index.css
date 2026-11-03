@@ -322,3 +322,39 @@
   0% { width: 30px; }
   55%, 100% { width: 150px; }
 }
+
+/* ---------- Hero: ember haze (drawn in code, replaces stock video) ---------- */
+.ember-haze span {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(60px);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.ember-haze .haze-a {
+  width: 60%;
+  height: 70%;
+  left: 20%;
+  top: -5%;
+  background: radial-gradient(circle, rgba(255, 90, 31, 0.45), transparent 65%);
+  animation: haze-a 16s ease-in-out infinite alternate;
+}
+.ember-haze .haze-b {
+  width: 45%;
+  height: 55%;
+  left: -8%;
+  top: 25%;
+  background: radial-gradient(circle, rgba(184, 54, 10, 0.5), transparent 65%);
+  animation: haze-b 21s ease-in-out infinite alternate;
+}
+.ember-haze .haze-c {
+  width: 40%;
+  height: 50%;
+  right: -6%;
+  top: 10%;
+  background: radial-gradient(circle, rgba(255, 181, 71, 0.22), transparent 65%);
+  animation: haze-c 13s ease-in-out infinite alternate;
+}
+@keyframes haze-a { to { transform: translate3d(6%, 8%, 0) scale(1.15); } }
+@keyframes haze-b { to { transform: translate3d(14%, -10%, 0) scale(1.2); } }
+@keyframes haze-c { to { transform: translate3d(-12%, 12%, 0) scale(0.9); } }

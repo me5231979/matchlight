@@ -6,11 +6,7 @@ import { NewWorld, OldWorld } from './HeroWorlds';
 
 const SparkField = lazy(() => import('./SparkField'));
 
-// MotionSites background d38a1a89 (abstract dark motion loop), graded warm. Lives in the new world.
-const HERO_VIDEO =
-  'https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260506_031045_0e1165dd-ab48-46e3-ad3d-5fe77f217647.mp4';
-
-/** Warm gradient behind the video; also what you see before it loads. */
+/** Warm base gradient for the new world. Everything in the hero is drawn in code; no stock footage. */
 const NEW_BG =
   'radial-gradient(120% 90% at 78% 40%, rgba(255,90,31,0.38) 0%, rgba(184,54,10,0.2) 30%, rgba(14,14,12,0) 64%), radial-gradient(80% 60% at 18% 20%, rgba(255,181,71,0.14) 0%, rgba(14,14,12,0) 60%), linear-gradient(180deg, #1C1B19 0%, #0E0E0C 100%)';
 
@@ -52,7 +48,6 @@ export default function Hero({ ignited }: { ignited: boolean }) {
   const ring = useRef<HTMLDivElement>(null);
   const title = useRef<HTMLHeadingElement>(null);
   const side = useRef<HTMLDivElement>(null);
-  const video = useRef<HTMLVideoElement>(null);
   const lens = useRef<Lens | null>(null);
   const [fx, setFx] = useState(false);
 
@@ -181,18 +176,13 @@ export default function Hero({ ignited }: { ignited: boolean }) {
     }
   }, [ignited, reduced]);
 
-  // Video and WebGL load after first paint so the headline owns LCP.
+  // WebGL loads after first paint so the headline owns LCP.
   useEffect(() => {
     if (reduced) return;
     const w = window as Window & typeof globalThis;
     const idle = (cb: () => void): number =>
       typeof w.requestIdleCallback === 'function' ? w.requestIdleCallback(cb, { timeout: 1500 }) : w.setTimeout(cb, 600);
     const id = idle(() => {
-      const v = video.current;
-      if (v && !v.src) {
-        v.src = HERO_VIDEO;
-        v.play().catch(() => {});
-      }
       if (!isMobile() && hasWebGL()) setFx(true);
     });
     return () => {
@@ -204,12 +194,13 @@ export default function Hero({ ignited }: { ignited: boolean }) {
   return (
     <section ref={section} id="top" className="relative h-[100svh] min-h-[640px] w-full p-3 md:p-6" aria-labelledby="hero-title">
       <div ref={card} data-hero-card className="relative h-full w-full overflow-hidden rounded-[20px] md:rounded-[32px]">
-        {/* New world (underneath): graded video, sparks, live work. */}
+        {/* New world (underneath): ember haze, sparks, live work. */}
         <div className="absolute inset-0" style={{ background: NEW_BG }}>
-          {!reduced && (
-            <video ref={video} className="absolute inset-0 h-full w-full object-cover opacity-70" muted loop playsInline preload="none" aria-hidden />
-          )}
-          <div className="pointer-events-none absolute inset-0 bg-ember opacity-30 mix-blend-color" />
+          <div aria-hidden className="ember-haze pointer-events-none absolute inset-0 overflow-hidden">
+            <span className="haze-a" />
+            <span className="haze-b" />
+            <span className="haze-c" />
+          </div>
           <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.4] mix-blend-overlay" />
           {fx && !mobile && (
             <Suspense fallback={null}>

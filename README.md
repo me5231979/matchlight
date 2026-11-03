@@ -48,7 +48,7 @@ Or import the GitHub repo in the Vercel dashboard. No environment variables are 
 
 - `prefers-reduced-motion`: no preloader, no WebGL, no video, no scrubbing. Static lens, static layouts.
 - Fonts are self-hosted (Geist, Geist Mono, Instrument Serif; SIL Open Font License), latin subset, preloaded.
-- Video and Three.js load after first paint. Section ScrollTriggers set up in idle time, one section per task.
+- Everything in the hero is drawn in code (SVG, CSS, WebGL); no stock footage or third-party media. Three.js loads after first paint. Section ScrollTriggers set up in idle time, one section per task.
 - One `h1`, landmarks for nav, main, and footer, skip link, Ember focus rings, focus trap in the menu.
 
 ## Placeholders to replace before launch
