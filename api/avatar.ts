@@ -64,7 +64,6 @@ export async function POST(request: Request) {
     voiceId: process.env.ANAM_VOICE_ID || DEFAULT_VOICE_ID,
     systemPrompt: SYSTEM_PROMPT,
     maxSessionLengthSeconds: 660,
-    directorNotes: { presetStyle: 'sad', expressivity: 0.35 },
   };
   personaConfig.llmId = process.env.ANAM_LLM_ID || DEFAULT_LLM_ID;
 

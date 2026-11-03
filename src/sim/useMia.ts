@@ -105,7 +105,8 @@ export function useMia() {
         return true;
       } catch (e) {
         console.warn('Mia unavailable, falling back to the ElevenLabs voice.', e);
-        setWhy(e instanceof Error ? e.message : String(e));
+        const cause = (e as { details?: { cause?: unknown } })?.details?.cause;
+        setWhy(`${e instanceof Error ? e.message : String(e)}${cause ? `: ${typeof cause === 'string' ? cause : JSON.stringify(cause)}` : ''}`);
         const c = client.current;
         client.current = null;
         void c?.stopStreaming().catch(() => {});
