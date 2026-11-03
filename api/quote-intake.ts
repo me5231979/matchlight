@@ -54,10 +54,16 @@ const ALLOWED_ORIGINS = [/^https:\/\/matchlight[\w-]*\.vercel\.app$/, /^https:\/
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
+// Forgiving match: ignore surrounding spaces or a stray line break (common when
+// pasting into Vercel) and letter case. The code is a team password, not a key.
+const norm = (s: string | null | undefined) => (s ?? '').trim().toLowerCase();
+
 function authorized(request: Request) {
-  const code = process.env.QUOTE_ACCESS_CODE;
+  const code = norm(process.env.QUOTE_ACCESS_CODE);
   if (!code) return true;
-  return request.headers.get('x-quote-code') === code;
+  const got = norm(request.headers.get('x-quote-code'));
+  if (got !== code) console.warn('quote-intake: access code did not match', { sent: got.length > 0 });
+  return got === code;
 }
 
 function link(request: Request, fields: unknown) {
@@ -67,7 +73,7 @@ function link(request: Request, fields: unknown) {
 }
 
 export async function GET() {
-  return json({ gate: !!process.env.QUOTE_ACCESS_CODE });
+  return json({ gate: !!norm(process.env.QUOTE_ACCESS_CODE) });
 }
 
 export async function POST(request: Request) {

@@ -642,16 +642,19 @@ body.meet aside.quote { position: static; order: -1; }
   fetch('/api/quote-intake').then(function (r) { return /json/.test(r.headers.get('content-type') || '') ? r.json() : {}; }).then(function (g) {
     if (g.gate !== true) return;
     var tryCode = function (c) { code = c; return api({ check: true }).then(function (r) { return !r.error; }); };
-    tryCode(code).then(function (ok) {
+    var showGate = function () { $('gate').hidden = false; $('code').focus(); };
+    tryCode(code).catch(function () { return false; }).then(function (ok) {
       if (ok) return;
-      $('gate').hidden = false; $('code').focus();
+      showGate();
       $('gateForm').addEventListener('submit', function (e) {
         e.preventDefault();
-        tryCode($('code').value).then(function (ok2) {
-          if (!ok2) { $('gateErr').textContent = 'That code did not work.'; return; }
+        $('gateErr').textContent = 'Checking…';
+        tryCode($('code').value.trim()).then(function (ok2) {
+          if (!ok2) { $('gateErr').textContent = 'That code did not work. Check it matches QUOTE_ACCESS_CODE in Vercel.'; return; }
           try { localStorage.setItem('ml-quote-code', code); } catch (err) {}
+          $('gateErr').textContent = '';
           $('gate').hidden = true;
-        });
+        }).catch(function () { $('gateErr').textContent = 'Could not reach the server. Try again.'; });
       });
     });
   }).catch(function () {});
