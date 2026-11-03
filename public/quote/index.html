@@ -241,7 +241,18 @@ body.meet aside.quote { position: static; order: -1; }
         <!-- 5 -->
         <section class="card" data-step="4" hidden>
           <h2>The quote</h2>
-          <p class="hint">Copy this into the proposal. Turn on internal view to see our costs and margin before you send it.</p>
+          <p class="hint">Fill in who it's for, then print the branded proposal or email it. Turn on internal view to check our costs and margin first.</p>
+          <div class="stack">
+            <div class="row"><label for="contact">Client contact<small>Name on the proposal</small></label><input id="contact" type="text" placeholder="Full name"></div>
+            <div class="row"><label for="email">Client email</label><input id="email" type="text" inputmode="email" placeholder="name@company.com"></div>
+            <div class="row"><label for="preparedBy">Prepared by</label><input id="preparedBy" type="text" placeholder="Your name"></div>
+          </div>
+          <div class="bar" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+            <button type="button" class="btn" id="proposal">Open proposal to print</button>
+            <button type="button" class="btn ghost" id="emailBtn">Email proposal</button>
+            <button type="button" class="btn ghost" id="proposalLink">Copy proposal link</button>
+            <span class="status" id="propStatus" role="status"></span>
+          </div>
           <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px">
             <label class="toggle"><input type="checkbox" id="internal"> Internal view</label>
             <div style="display:flex;gap:10px;align-items:center"><span class="status" id="copied" role="status"></span><button type="button" class="btn" id="copy">Copy quote</button></div>
@@ -435,7 +446,7 @@ body.meet aside.quote { position: static; order: -1; }
     var mk = rate('markup');
 
     var lines = [
-      { name: 'Maintenance', sub: maintSel === 'none' ? 'Not included' : MAINT_HOURS[maintSel] + ' hrs a month, ' + maintSel, cost: maint, price: maint },
+      { name: 'Maintenance', sub: maintSel === 'none' ? 'Not included' : MAINT_HOURS[maintSel] + (MAINT_HOURS[maintSel] === 1 ? ' hour' : ' hours') + ' a month, ' + maintSel + ' plan', cost: maint, price: maint },
       { name: 'Hosting', sub: delivery === 'hosted' ? 'Web app, domain, SSL, logs (Vercel)' : delivery === 'scormai' ? 'AI service the SCORM package calls' : 'Not needed: runs in their LMS', cost: hosting, price: hosting * mk },
       { name: 'Live character credits', sub: on.avatar ? 'Anam, ' + Math.round(roundsYr * mins * (1 - elevenShare)).toLocaleString() + ' min a year' : 'Not in scope', cost: anamCost, price: anamCost * mk },
       { name: 'Voice credits', sub: (on.voice || on.avatar) ? 'ElevenLabs, chat mode and fallback' : 'Not in scope', cost: elevenCost, price: elevenCost * mk },
@@ -534,12 +545,15 @@ body.meet aside.quote { position: static; order: -1; }
       ongoing: shownAnnual, month: month, monthly: monthlyBilling, handover: handover, learners: learners,
       lines: lines.filter(function (l) { return l.price > 0; }).map(function (l) { return [l.name, l.sub, l.price]; }),
       direct: direct.map(function (d) { return [d[0], d[2]]; }), directMonth: directMonth,
+      notes: FEATURES.filter(function (f) { return on[f.id]; }).map(function (f) { return [f.name, f.note]; }),
+      weeks: days ? Math.max(3, Math.ceil(days / 4) + 1) : 0, ai: ai, rounds: num('rounds'), minutes: num('minutes'), months: num('months'),
+      contact: $('contact').value, email: $('email').value, preparedBy: $('preparedBy').value, dkind: delivery,
     });
 
     // save
     try {
       var s = { delivery: delivery, own: own };
-      ['client', 'project', 'scenarios', 'learners', 'rounds', 'minutes', 'months', 'maint', 'analytics', 'billing'].forEach(function (k) { s[k] = $(k).value; });
+      ['client', 'project', 'scenarios', 'learners', 'rounds', 'minutes', 'months', 'maint', 'analytics', 'billing', 'contact', 'email', 'preparedBy'].forEach(function (k) { s[k] = $(k).value; });
       FEATURES.forEach(function (f) { s['ft_' + f.id] = $('ft_' + f.id).checked; });
       RATES.forEach(function (r) { s['r_' + r[0]] = $('r_' + r[0]).value; });
       localStorage.setItem(KEY, JSON.stringify(s));
@@ -576,6 +590,35 @@ body.meet aside.quote { position: static; order: -1; }
     try { channel && channel.postMessage(view); } catch (e) {}
     if (meetPanel) meetPanel.notifyMainStage(JSON.stringify(view)).catch(function () {});
   }
+
+  // ---- Proposal: printable, branded, shareable by link (the link carries the client-facing quote only).
+  function proposalUrl() {
+    var v = lastView || {};
+    var enc = btoa(unescape(encodeURIComponent(JSON.stringify(v)))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    return location.origin + '/quote/proposal.html#q=' + enc;
+  }
+  $('proposal').addEventListener('click', function () { window.open(proposalUrl(), '_blank'); });
+  $('proposalLink').addEventListener('click', function () {
+    var url = proposalUrl();
+    try { navigator.clipboard.writeText(url).then(function () { $('propStatus').textContent = 'Proposal link copied.'; }, function () { $('text').value = url; $('propStatus').textContent = 'Link is in the box below.'; }); }
+    catch (e) { $('text').value = url; $('propStatus').textContent = 'Link is in the box below.'; }
+  });
+  $('emailBtn').addEventListener('click', function () {
+    var v = lastView || {};
+    var first = (v.contact || '').split(' ')[0];
+    var subject = 'Proposal: ' + (v.project || 'your simulation') + (v.client ? ' for ' + v.client : '');
+    var body = [
+      (first ? 'Hi ' + first + ',' : 'Hi,'), '',
+      'Thank you for the conversation. Here is our proposal for ' + (v.project || 'the simulation') + '.', '',
+      'One-time build: ' + usd(v.build || 0),
+      v.ongoing > 0 ? (v.handover ? 'Support: ' : 'Ongoing: ') + usd(v.ongoing) + ' per year' : (v.handover ? 'Ongoing to Matchlight: none. You own it and run it on your accounts.' : 'Ongoing: none'),
+      '', 'The full proposal, with scope, timeline and terms:', proposalUrl(), '',
+      'Happy to walk through it together.', '', (v.preparedBy || 'The Matchlight team'),
+    ].join('\n');
+    var href = 'mailto:' + encodeURIComponent(v.email || '') + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+    location.href = href;
+    $('propStatus').textContent = 'Opening your email app. Attach the PDF if you saved one.';
+  });
 
   // ---- Autofill from notes
   var code = '';
