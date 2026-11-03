@@ -32,7 +32,7 @@ Flow: cold open, mirror (self-rate, then coach), see it done (contrasting cases)
 
 | Piece | Where |
 |---|---|
-| Jordan (voice agent) | ElevenLabs agent `agent_4001m6fw27x8f6tb85497ks89dvx`, LLM `claude-haiku-5-5`. Session variables: `first_line`, `persona`, `mode`, `context`. Text-only override allowed for typed mode. |
+| Jordan (voice agent) | ElevenLabs agent `agent_4001m6fw27x8f6tb85497ks89dvx`, LLM `gemini-3.5-flash` (Claude models failed over on every turn in this workspace, adding latency). Voice cues like `[sad]` drive delivery and are stripped from captions. Session variables: `first_line`, `persona`, `mode`, `context`. Text-only override allowed for typed mode. |
 | Coach scoring | `api/score.ts` (Vercel function). Needs `ANTHROPIC_API_KEY` in the Vercel project's environment variables. Uses server-side refusal fallbacks (`fallbacks: "default"`). |
 | Course UI | `src/course/` (`CourseApp.tsx`, `useJordan.ts`, `CallPanel.tsx`, `Feedback.tsx`, `data.ts`). |
 

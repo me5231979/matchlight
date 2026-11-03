@@ -75,10 +75,10 @@ function Why({ step }: { step: string }) {
 
 function Header({ title, kicker, children }: { title: string; kicker: string; children?: React.ReactNode }) {
   return (
-    <div className="mb-10">
-      <p className="label text-ash">{kicker}</p>
-      <h1 className="mt-3 text-[34px] font-semibold leading-[1.08] tracking-[-0.025em] text-bone md:text-[48px]">{title}</h1>
-      {children && <div className="mt-4 max-w-2xl text-body-l text-bone/75">{children}</div>}
+    <div className="mb-12 md:mb-16">
+      <p className="label text-ember">{kicker}</p>
+      <h1 className="mt-4 max-w-4xl text-[40px] font-semibold leading-[1.02] tracking-[-0.035em] text-bone md:text-[72px]">{title}</h1>
+      {children && <div className="mt-6 max-w-2xl text-body-l text-bone/70">{children}</div>}
     </div>
   );
 }
@@ -175,7 +175,7 @@ function Round({
   focus,
   run,
   onDone,
-  startLabel = 'Start the conversation',
+  startLabel = 'Walk into the room',
   brief,
 }: {
   typed: boolean;
@@ -204,16 +204,25 @@ function Round({
     return (
       <div className="space-y-6">
         {brief}
-        <button type="button" className="btn-primary" onClick={() => (setPhase('call'), begin({ ...start, limit }))}>
-          {typed ? 'Start typing with Jordan' : startLabel}
-          <span className="chip">{typed ? <Keyboard size={18} strokeWidth={1.5} /> : <Mic size={18} strokeWidth={1.5} />}</span>
-        </button>
+        <div className="relative overflow-hidden rounded-[28px] border border-line bg-[#0b0b0a] px-6 py-12 text-center md:py-16">
+          <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(50% 60% at 50% 30%, rgba(255,90,31,0.14), transparent 70%)' }} />
+          <div
+            aria-hidden
+            className="relative mx-auto h-24 w-24 animate-pulse rounded-full"
+            style={{ background: 'radial-gradient(circle at 38% 32%, #FFE1B0 0%, #FFB547 18%, #FF5A1F 48%, #8a2a08 78%, #2a0f05 100%)', boxShadow: '0 0 80px 10px rgba(255,90,31,0.25)' }}
+          />
+          <p className="relative mt-6 text-ash">{typed ? 'Jordan will open. Type your replies.' : 'Jordan will open. Answer out loud. Headphones help.'}</p>
+          <button type="button" className="btn-primary relative mt-6 text-[17px]" onClick={() => (setPhase('call'), begin({ ...start, limit }))}>
+            {typed ? 'Start typing with Jordan' : startLabel}
+            <span className="chip">{typed ? <Keyboard size={18} strokeWidth={1.5} /> : <Mic size={18} strokeWidth={1.5} />}</span>
+          </button>
+        </div>
       </div>
     );
 
   if (phase === 'call')
     return (
-      <div className="space-y-4">
+      <div className="scroll-mt-24 space-y-4" ref={(el) => el && j.status === 'connecting' && el.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
         <CallPanel
           status={j.status}
           lines={j.lines}
@@ -247,10 +256,10 @@ function Round({
       )}
       {run?.result && (
         <div className="grid gap-6 lg:grid-cols-12">
-          <div className="card p-6 lg:col-span-7">
+          <div className="lg:col-span-12">
             <ScoreBars result={run.result} focus={focus} />
           </div>
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-12">
             <CoachNote result={run.result} />
           </div>
         </div>
@@ -296,49 +305,47 @@ export default function CourseApp() {
       <a href="#course" className="sr-only-focusable fixed left-4 top-4 z-[300] rounded-full bg-bone px-4 py-2 text-ink">
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 border-b border-line bg-ink/85 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 bg-ink/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4 md:px-6">
           <a href="/" className="text-[18px] text-bone" aria-label="Matchlight home">
             <Wordmark />
           </a>
-          <p className="hidden text-[14px] text-ash md:block">
-            Demo course · <span className="text-bone">The Hard Conversation</span>
-          </p>
-          <a href="/" className="inline-flex items-center gap-2 text-[14px] text-bone/80 hover:text-bone">
+          {!rep && (
+            <nav aria-label="Course steps" className="flex items-center gap-4">
+              <span className="hidden font-mono text-[12px] uppercase tracking-[0.1em] text-ash sm:inline">
+                {String(idx).padStart(2, '0')} / {String(STEPS.length - 1).padStart(2, '0')} · <span className="text-bone">{STEPS[idx].label}</span>
+              </span>
+              <ol className="flex items-center gap-1.5">
+                {STEPS.map((st, i) => {
+                  const can = s.visited.includes(st.id);
+                  const on = st.id === s.step;
+                  return (
+                    <li key={st.id}>
+                      <button
+                        type="button"
+                        disabled={!can}
+                        onClick={() => go(st.id)}
+                        aria-current={on ? 'step' : undefined}
+                        aria-label={`${i}. ${st.label}`}
+                        title={st.label}
+                        className={`block h-2 rounded-full transition-all ${on ? 'w-6 bg-ember' : can ? 'w-2 bg-bone/50 hover:bg-bone' : 'w-2 bg-bone/15'}`}
+                      />
+                    </li>
+                  );
+                })}
+              </ol>
+            </nav>
+          )}
+          <a href="/" className="inline-flex items-center gap-2 text-[14px] text-bone/70 hover:text-bone">
             <ArrowLeft size={15} strokeWidth={1.5} aria-hidden /> Exit
           </a>
         </div>
-        {!rep && (
-          <nav aria-label="Course steps" className="mx-auto max-w-[1200px] overflow-x-auto px-4 pb-3 md:px-6">
-            <ol className="flex min-w-max gap-1">
-              {STEPS.map((st, i) => {
-                const can = s.visited.includes(st.id);
-                const on = st.id === s.step;
-                return (
-                  <li key={st.id}>
-                    <button
-                      type="button"
-                      disabled={!can}
-                      onClick={() => go(st.id)}
-                      aria-current={on ? 'step' : undefined}
-                      className={`rounded-full px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] ${
-                        on ? 'bg-bone text-ink' : can ? 'text-bone/80 hover:text-bone' : 'text-ash/60'
-                      }`}
-                    >
-                      {String(i).padStart(2, '0')} {st.label}
-                    </button>
-                  </li>
-                );
-              })}
-            </ol>
-            <div className="mt-2 h-px w-full bg-bone/10">
-              <div className="strike-line h-px transition-[width] duration-500" style={{ width: `${(idx / (STEPS.length - 1)) * 100}%` }} />
-            </div>
-          </nav>
-        )}
+        <div className="h-px w-full bg-bone/10">
+          <div className="strike-line h-px transition-[width] duration-700" style={{ width: `${rep ? 100 : (idx / (STEPS.length - 1)) * 100}%` }} />
+        </div>
       </header>
 
-      <main id="course" className="mx-auto max-w-[1200px] px-4 pb-32 pt-12 md:px-6 md:pt-16">
+      <main id="course" className="relative mx-auto max-w-[1200px] px-4 pb-32 pt-12 md:px-6 md:pt-20">
         {rep ? <RepStep s={s} set={set} /> : <StepView s={s} set={set} go={go} />}
       </main>
     </>
@@ -369,71 +376,90 @@ function StepView(p: StepProps) {
 }
 
 /* 00 Intro */
-function Intro({ s, set, go }: StepProps) {
+function Intro({ set, go }: StepProps) {
   return (
-    <section>
-      <Header kicker="Demo course · about 30 minutes" title="The Hard Conversation">
-        <p>
-          The capability: you can lead a hard conversation with someone whose work has slipped. You open with specifics, ask before you
-          tell, stay steady, and leave with a next step you both believe in.
-        </p>
-        <p className="mt-4">
-          You will practice out loud with Jordan, a direct report played by AI. Jordan responds to <em>how</em> you handle it, not to
-          the right keywords.
-        </p>
-      </Header>
+    <section className="relative">
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[640px] w-[900px] -translate-x-1/2 rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(255,90,31,0.18), transparent)' }} />
+      <div className="relative grid items-center gap-14 lg:grid-cols-12">
+        <div className="lg:col-span-7">
+          <p className="label text-ember">Matchlight demo · voice simulation</p>
+          <h1 className="mt-5 text-[52px] font-semibold leading-[0.98] tracking-[-0.045em] text-bone md:text-[96px]">
+            The <span className="accent">hard</span>
+            <br />
+            conversation.
+          </h1>
+          <p className="mt-8 max-w-xl text-body-l text-bone/75">
+            Jordan, one of your best people, has slipped. You have to talk about it. Practice it out loud with an AI who reacts to how
+            you handle it, then see exactly what landed.
+          </p>
+          <div className="mt-10 flex flex-wrap items-center gap-5">
+            <button type="button" className="btn-primary text-[18px]" onClick={() => (set({ typed: false }), go('cold'))}>
+              Walk into the room
+              <span className="chip">
+                <Mic size={18} strokeWidth={1.5} aria-hidden />
+              </span>
+            </button>
+            <button type="button" className="inline-flex items-center gap-2 text-bone/70 underline-offset-4 hover:text-bone hover:underline" onClick={() => (set({ typed: true }), go('cold'))}>
+              <Keyboard size={16} strokeWidth={1.5} aria-hidden /> I'd rather type
+            </button>
+          </div>
+          <p className="mt-10 flex flex-wrap gap-x-6 gap-y-2 font-mono text-[12px] uppercase tracking-[0.08em] text-ash">
+            <span>About 30 min</span>
+            <span>7 steps</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Lock size={12} strokeWidth={1.5} aria-hidden /> Private by default
+            </span>
+          </p>
+        </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <ScenarioCard />
-        <div className="card p-6">
-          <p className="label text-ash">How you'll practice</p>
-          <ol className="mt-4 space-y-3 text-bone/85">
-            {[
-              ['Cold open', 'Straight in. No instructions. 3 minutes.'],
-              ['Mirror', 'Rate yourself, then see what the coach saw.'],
-              ['See it done', 'Spot the difference between two versions.'],
-              ['Drills', 'Five 60-second reps on one move each.'],
-              ['Harder', 'Defensive, upset, and quiet Jordan. Hints fade.'],
-              ['Plan it', 'Plan a real conversation and rehearse it.'],
-              ['Results', 'Before and after, plus spaced reps.'],
-            ].map(([t, d], i) => (
-              <li key={t} className="flex gap-4">
-                <span className="font-mono text-[12px] text-ash">0{i + 1}</span>
-                <span>
-                  <span className="text-bone">{t}.</span> {d}
-                </span>
-              </li>
-            ))}
-          </ol>
+        {/* Jordan's file */}
+        <div className="lg:col-span-5">
+          <div className="relative overflow-hidden rounded-[28px] border border-line bg-[#0b0b0a] p-7">
+            <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(70% 50% at 50% 0%, rgba(255,90,31,0.14), transparent 70%)' }} />
+            <div className="relative flex items-center gap-5">
+              <div
+                aria-hidden
+                className="h-20 w-20 shrink-0 rounded-full"
+                style={{ background: 'radial-gradient(circle at 38% 32%, #FFE1B0 0%, #FFB547 18%, #FF5A1F 48%, #8a2a08 78%, #2a0f05 100%)', boxShadow: '0 0 50px 4px rgba(255,90,31,0.25)' }}
+              />
+              <div>
+                <p className="text-[22px] font-semibold tracking-[-0.01em] text-bone">{SCENARIO.who}</p>
+                <p className="text-[14px] text-ash">Senior project coordinator · 4 years</p>
+              </div>
+            </div>
+            <ul className="relative mt-7 space-y-3">
+              {SCENARIO.facts.map((f, i) => (
+                <li key={f} className="flex gap-4 rounded-xl border border-line bg-ink/60 px-4 py-3 text-[15px] text-bone/85">
+                  <span className="font-mono text-[11px] text-ash">0{i + 1}</span>
+                  {f}
+                </li>
+              ))}
+            </ul>
+            <p className="relative mt-6 text-[14px] text-ash">Your goal: find out what is going on, and leave with a next step you both believe in.</p>
+          </div>
         </div>
       </div>
 
-      <div className="mt-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <fieldset className="flex flex-wrap items-center gap-2">
-          <legend className="mb-3 w-full text-ash">How do you want to talk to Jordan?</legend>
-          {[
-            { v: false, label: 'Talk (microphone)', Icon: Mic },
-            { v: true, label: 'Type', Icon: Keyboard },
-          ].map(({ v, label, Icon }) => (
-            <button
-              key={label}
-              type="button"
-              aria-pressed={s.typed === v}
-              onClick={() => set({ typed: v })}
-              className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 ${
-                s.typed === v ? 'border-ember text-bone' : 'border-line text-bone/70 hover:text-bone'
-              }`}
-            >
-              <Icon size={16} strokeWidth={1.5} aria-hidden /> {label}
-            </button>
-          ))}
-        </fieldset>
-        <Next onClick={() => go('cold')} label="Begin" />
-      </div>
-      <p className="mt-8 flex items-start gap-2 text-[14px] text-ash">
-        <Lock size={15} strokeWidth={1.5} className="mt-0.5 shrink-0" aria-hidden />
-        Private by default. Your progress stays in this browser. To score a round, its transcript is sent to the coach (Claude) and
-        not stored. Voice runs through ElevenLabs.
+      <ol className="relative mt-20 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-line bg-line sm:grid-cols-4 lg:grid-cols-7">
+        {[
+          ['Cold open', '3 min, no help'],
+          ['Mirror', 'What landed'],
+          ['See it done', 'Spot the difference'],
+          ['Drills', 'One move each'],
+          ['Harder', 'Three Jordans'],
+          ['Plan it', 'Your real one'],
+          ['Results', 'Before and after'],
+        ].map(([t, d], i) => (
+          <li key={t} className="bg-ink p-4">
+            <span className="font-mono text-[11px] text-ember">0{i + 1}</span>
+            <p className="mt-2 text-[15px] font-medium text-bone">{t}</p>
+            <p className="text-[13px] text-ash">{d}</p>
+          </li>
+        ))}
+      </ol>
+      <p className="relative mt-6 text-[13px] text-ash">
+        Progress stays in this browser. To score a round, its transcript goes to the coach (Claude) and is not stored. Voice runs through
+        ElevenLabs.
       </p>
     </section>
   );
@@ -529,10 +555,10 @@ function Mirror({ s, set, go }: StepProps) {
           {run.result ? (
             <>
               <div className="grid gap-6 lg:grid-cols-12">
-                <div className="card p-6 lg:col-span-7">
+                <div className="lg:col-span-12">
                   <ScoreBars result={run.result} />
                 </div>
-                <div className="space-y-6 lg:col-span-5">
+                <div className="grid gap-6 lg:col-span-12 lg:grid-cols-2">
                   <CoachNote result={run.result} />
                   {gaps.length > 0 && (
                     <div className="card p-6">
@@ -817,14 +843,14 @@ function Results({ s, set, go }: StepProps) {
       </Header>
       {base && latest?.result ? (
         <div className="grid gap-6 lg:grid-cols-12">
-          <div className="card p-6 lg:col-span-7">
+          <div className="lg:col-span-12">
             <div className="mb-6 flex items-baseline gap-4">
               <span className="font-mono text-[48px] leading-none text-bone">{total(latest.result)}</span>
               <span className="text-ash">of 15, up from {total(base)} in the cold open</span>
             </div>
             <ScoreBars result={latest.result} compare={base} />
           </div>
-          <div className="space-y-6 lg:col-span-5">
+          <div className="grid gap-6 lg:col-span-12 lg:grid-cols-2">
             <CoachNote result={latest.result} />
             <div className="card p-6">
               <p className="label text-ash">Did Jordan open up?</p>

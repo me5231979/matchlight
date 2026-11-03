@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Conversation } from '@elevenlabs/client';
+import { Conversation, stripAudioTags } from '@elevenlabs/client';
 import { AGENT_ID } from './data';
 
 export type Line = { role: 'manager' | 'jordan'; text: string };
@@ -99,7 +99,8 @@ export function useJordan() {
           },
           onConnect: () => setStatus('live'),
           onMessage: ({ message, role }) => {
-            const text = message.trim();
+            // Voice cues like [sad] shape Jordan's delivery; keep them out of captions.
+            const text = stripAudioTags(message).replace(/\s{2,}/g, ' ').trim();
             // Typed mode: we already added the manager's own message on send.
             if (o.typed && role !== 'agent') return;
             if (text) push({ role: role === 'agent' ? 'jordan' : 'manager', text });

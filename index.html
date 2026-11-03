@@ -25,7 +25,9 @@
         try {
           var rm = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
           var seen = sessionStorage.getItem('ml-struck') === '1';
-          if (!rm && !seen) document.documentElement.classList.add('is-striking');
+          // Only the homepage has the strike intro; never lock scrolling elsewhere.
+          var home = location.pathname === '/' || location.pathname === '';
+          if (home && !rm && !seen) document.documentElement.classList.add('is-striking');
         } catch (e) {}
       })();
     </script>
