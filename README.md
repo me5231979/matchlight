@@ -74,12 +74,15 @@ Before sharing publicly: in the ElevenLabs dashboard, open the Jordan agent's Se
 - Proof strip entries.
 - Scenes and numbers in the hero and service cards (shipped day 9, capability map gaps) are illustrative.
 
-## Live lip-synced Jordan (optional)
+## Live Jordan, played by Mia (Anam)
 
-The call uses [Anam](https://lab.anam.ai) to render Jordan's face from the ElevenLabs voice in real time.
-ElevenLabs stays the voice and conversation; Anam only animates the face (audio passthrough).
+Voice calls run on [Anam](https://lab.anam.ai): it hears the manager, runs Jordan's character
+(the system prompt lives in `api/avatar.ts`), and speaks in Mia's voice with lip-synced video.
+Chat calls, and voice calls when Anam is unavailable, use the ElevenLabs agent with Mia's still frame
+(`public/jordan/portrait.webp`).
 
-1. In Anam Lab, pick the avatar who plays Jordan (`public/jordan/portrait.webp` is a still of them, used on the desk and pre-join screen).
-2. In Vercel, add `ANAM_API_KEY` and `ANAM_AVATAR_ID`, then redeploy.
-
-Without them (or if Anam fails to connect within 12 seconds) the call shows Jordan's still frame with the voice on the speakers.
+Vercel environment variables:
+- `ANAM_API_KEY` (secret)
+- `ANAM_AVATAR_ID`: Mia's avatar ID
+- `ANAM_VOICE_ID` (optional): defaults to Mia's voice
+- `ANAM_LLM_ID` (optional): the Anam LLM to run Jordan; Anam's default is used if unset

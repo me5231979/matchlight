@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Captions, Keyboard, Lock, Mic, MicOff, NotebookPen, PhoneOff, Send, Video, VideoOff } from 'lucide-react';
 import type { CallStatus, Line, Mood } from '../course/useJordan';
 import { MEDIA } from './Desk';
-import { AVATAR_VIDEO_ID } from './useAvatar';
+import { AVATAR_VIDEO_ID } from './useMia';
 
 
 

@@ -6,7 +6,7 @@ import { DEFAULT_PERSONA } from '../course/data';
 import { scoreTranscript, useJordan, type Line, type ScoreResult } from '../course/useJordan';
 import Desk, { MEDIA } from './Desk';
 import VideoCall, { Lobby, useCamera } from './VideoCall';
-import { useAvatar } from './useAvatar';
+import { FIRST_LINE, useMia } from './useMia';
 import { BEFORE, CLUES, LATER, type Tier } from './world';
 import { TIER_COPY, decideTier, readSignals } from './outcome';
 
@@ -32,8 +32,11 @@ export default function SimApp() {
   const [camOn, setCamOn] = useState(false);
   const cam = useCamera(camOn, false);
   const j = useJordan();
-  const face = useAvatar();
+  const mia = useMia();
+  const [engine, setEngine] = useState<'mia' | 'voice'>('mia');
   const joining = useRef(0);
+  // Whichever is running the call: Mia (Anam) or the ElevenLabs fallback.
+  const call = engine === 'mia' ? mia : j;
   const scored = useRef<Promise<Run> | null>(null);
 
   useEffect(() => {
@@ -55,50 +58,41 @@ export default function SimApp() {
     joining.current += 1;
   };
 
-  // Once the call screen (and its video element) is up: bring Jordan's live face
-  // online first, then open the conversation so no words are lost. In chat mode,
-  // or if the face is unavailable, Jordan uses the recorded loops instead.
+  // Once the call screen (and its video element) is up, connect. Voice calls go to
+  // Mia (Anam: her face, her voice, lip-synced). Chat calls, or a voice call Mia
+  // cannot take, use the ElevenLabs agent with Mia's still frame.
   const joinTick = joining.current;
   useEffect(() => {
     if (stage !== 'call' || !joinTick) return;
     let gone = false;
     void (async () => {
       const typed = saved.typed;
-      const live = !typed && (await face.start());
-      if (gone) return void face.stop();
-      void j.start({
-        firstLine: 'Hey. Sorry, I was just finishing something. You wanted to talk?',
-        persona: DEFAULT_PERSONA,
-        typed,
-        limit: LIMIT,
-        avatar: live ? { onAudio: face.feed, onTurnEnd: face.end, onInterrupt: face.interrupt } : undefined,
-      });
+      if (!typed) {
+        setEngine('mia');
+        if (await mia.start(LIMIT)) return;
+        if (gone) return;
+      }
+      setEngine('voice');
+      void j.start({ firstLine: FIRST_LINE, persona: DEFAULT_PERSONA, typed, limit: LIMIT });
     })();
     return () => {
       gone = true;
     };
   }, [stage, joinTick]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => face.mood(j.mood), [j.mood]); // eslint-disable-line react-hooks/exhaustive-deps
-  // If the face drops mid-call, put Jordan's voice back on the speakers.
-  useEffect(() => {
-    if (stage === 'call' && face.status === 'off' && j.status === 'live') j.speakers(true);
-  }, [face.status]); // eslint-disable-line react-hooks/exhaustive-deps
-
   // When the call ends, time moves on. Scoring runs while two weeks pass.
   useEffect(() => {
-    if (stage !== 'call' || (j.status !== 'ended' && j.status !== 'error')) return;
-    if (!j.lines.some((l) => l.role === 'manager')) return;
-    const lines = j.lines;
+    if (stage !== 'call' || (call.status !== 'ended' && call.status !== 'error')) return;
+    if (!call.lines.some((l) => l.role === 'manager')) return;
+    const lines = call.lines;
     const seen = clues;
     setCamOn(false);
-    void face.stop();
     scored.current = scoreTranscript(lines).then((r) => {
       const result = 'error' in r ? null : r;
       return { lines, result, error: 'error' in r ? r.error : undefined, tier: decideTier(lines, result), clues: seen, at: Date.now() };
     });
     setStage('passing');
-  }, [j.status]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [call.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (stage !== 'passing') return;
@@ -141,24 +135,23 @@ export default function SimApp() {
     return (
       <>
         <VideoCall
-          status={j.status}
-          lines={j.lines}
-          speaking={j.speaking}
-          mood={j.mood}
-          elapsed={j.elapsed}
+          status={call.status}
+          lines={call.lines}
+          speaking={call.speaking}
+          elapsed={call.elapsed}
           limit={LIMIT}
           typed={saved.typed}
-          error={j.error}
+          error={call.error}
           notes={saved.notes}
           onSend={j.send}
-          onLeave={() => (void j.stop(), void face.stop())}
-          avatar={face.status}
-          onMute={j.mute}
+          onLeave={() => void call.stop()}
+          avatar={engine === 'mia' ? (mia.video ? 'live' : 'starting') : 'off'}
+          onMute={call.mute}
           stream={cam.stream}
           camOn={camOn && !cam.denied}
           setCamOn={setCamOn}
         />
-        {(j.status === 'ended' || j.status === 'error') && !j.lines.some((l) => l.role === 'manager') && (
+        {(call.status === 'ended' || call.status === 'error') && !call.lines.some((l) => l.role === 'manager') && (
           <div className="os fixed inset-x-0 bottom-24 z-50 mx-auto w-fit rounded-2xl bg-white px-5 py-4 text-[14px] text-[#202124] shadow-2xl">
             {saved.typed ? 'The call ended before you said anything.' : 'Jordan did not hear anything from you.'}{' '}
             <button type="button" className="ml-2 font-medium text-[#1a73e8]" onClick={() => join(saved.typed)}>
