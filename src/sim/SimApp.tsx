@@ -151,6 +151,11 @@ export default function SimApp() {
           camOn={camOn && !cam.denied}
           setCamOn={setCamOn}
         />
+        {engine === 'voice' && mia.why && !saved.typed && (
+          <p className="os fixed left-1/2 top-14 z-50 max-w-xl -translate-x-1/2 rounded-lg bg-black/75 px-3 py-1.5 text-center text-[12px] text-white/80">
+            Live video unavailable ({mia.why.slice(0, 160)}). Using voice only.
+          </p>
+        )}
         {(call.status === 'ended' || call.status === 'error') && !call.lines.some((l) => l.role === 'manager') && (
           <div className="os fixed inset-x-0 bottom-24 z-50 mx-auto w-fit rounded-2xl bg-white px-5 py-4 text-[14px] text-[#202124] shadow-2xl">
             {saved.typed ? 'The call ended before you said anything.' : 'Jordan did not hear anything from you.'}{' '}

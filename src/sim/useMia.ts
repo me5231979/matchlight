@@ -19,6 +19,8 @@ export function useMia() {
   const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
   const [video, setVideo] = useState(false);
+  /** Why the live video could not start (shown in the call so it can be fixed). */
+  const [why, setWhy] = useState('');
   const client = useRef<AnamClient | null>(null);
   const timer = useRef<number>();
   const quiet = useRef<number>();
@@ -45,8 +47,12 @@ export function useMia() {
       setError('');
       setElapsed(0);
       try {
+        setWhy('');
         const res = await fetch('/api/avatar', { method: 'POST' });
-        if (!res.ok) throw new Error(`avatar ${res.status}`);
+        if (!res.ok) {
+          const body = (await res.json().catch(() => ({}))) as { error?: string; status?: number; detail?: string };
+          throw new Error(`token: ${body.error ?? res.status}${body.status ? ` ${body.status}` : ''}${body.detail ? ` ${body.detail}` : ''}`);
+        }
         const { sessionToken } = (await res.json()) as { sessionToken: string };
         const { createClient, AnamEvent } = await import('@anam-ai/js-sdk');
         const c = createClient(sessionToken);
@@ -76,15 +82,16 @@ export function useMia() {
           setStatus((s) => (s === 'connecting' ? 'error' : s === 'error' ? s : 'ended'));
         });
 
+        // Live as soon as the session is ready or Mia's video is playing.
         const ready = new Promise<boolean>((resolve) => {
-          const t = window.setTimeout(() => resolve(false), 15000);
-          c.addListener(AnamEvent.SESSION_READY, () => {
-            window.clearTimeout(t);
-            resolve(true);
-          });
+          const t = window.setTimeout(() => resolve(false), 20000);
+          const ok = () => (window.clearTimeout(t), resolve(true));
+          c.addListener(AnamEvent.SESSION_READY, ok);
+          c.addListener(AnamEvent.VIDEO_PLAY_STARTED, ok);
         });
+        c.addListener(AnamEvent.SERVER_WARNING, (m) => console.warn('Anam:', m));
         await c.streamToVideoElement(AVATAR_VIDEO_ID);
-        if (!(await ready)) throw new Error('avatar timeout');
+        if (!(await ready)) throw new Error('timeout: no session ready or video within 20s');
 
         setLines([{ role: 'jordan', text: FIRST_LINE }]);
         setStatus('live');
@@ -98,6 +105,7 @@ export function useMia() {
         return true;
       } catch (e) {
         console.warn('Mia unavailable, falling back to the ElevenLabs voice.', e);
+        setWhy(e instanceof Error ? e.message : String(e));
         const c = client.current;
         client.current = null;
         void c?.stopStreaming().catch(() => {});
@@ -125,5 +133,5 @@ export function useMia() {
     [stop],
   );
 
-  return { status, lines, speaking, error, elapsed, video, start, stop, mute };
+  return { status, lines, speaking, error, elapsed, video, why, start, stop, mute };
 }

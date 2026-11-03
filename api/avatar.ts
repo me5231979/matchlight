@@ -65,10 +65,11 @@ export async function POST(request: Request) {
     if (!res.ok) {
       const detail = (await res.text()).slice(0, 500);
       console.error('anam session-token failed', res.status, detail);
-      return json({ error: 'upstream', status: res.status }, 502);
+      return json({ error: 'upstream', status: res.status, detail }, 502);
     }
     const data = (await res.json()) as { sessionToken?: string };
     if (!data.sessionToken) return json({ error: 'upstream' }, 502);
+    console.log('anam session-token ok');
     return json({ sessionToken: data.sessionToken });
   } catch (e) {
     console.error('anam session-token error', e);
