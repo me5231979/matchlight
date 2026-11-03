@@ -73,3 +73,13 @@ Before sharing publicly: in the ElevenLabs dashboard, open the Jordan agent's Se
 - LinkedIn link in the footer points to linkedin.com.
 - Proof strip entries.
 - Scenes and numbers in the hero and service cards (shipped day 9, capability map gaps) are illustrative.
+
+## Live lip-synced Jordan (optional)
+
+The call uses [Anam](https://lab.anam.ai) to render Jordan's face from the ElevenLabs voice in real time.
+ElevenLabs stays the voice and conversation; Anam only animates the face (audio passthrough).
+
+1. In Anam Lab, create a custom avatar from `https://matchlight-two.vercel.app/media/jordan-portrait.png`.
+2. In Vercel, add `ANAM_API_KEY` and `ANAM_AVATAR_ID`, then redeploy.
+
+Without them (or if Anam fails to connect within 12 seconds) the call falls back to the recorded video loops.

@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Captions, Keyboard, Lock, Mic, MicOff, NotebookPen, PhoneOff, Send, Video, VideoOff } from 'lucide-react';
 import type { CallStatus, Line, Mood } from '../course/useJordan';
 import { MEDIA } from './Desk';
+import { AVATAR_VIDEO_ID } from './useAvatar';
 
 export const CLIPS = {
   idle: '/media/jordan-idle.mp4',
@@ -61,7 +62,7 @@ function SelfView({ stream, on, className = '' }: { stream: MediaStream | null; 
 }
 
 /** Jordan's video. Each mood is a short loop; we cross-fade between them. */
-function JordanVideo({ clip, speaking }: { clip: Clip; speaking: boolean }) {
+function JordanVideo({ clip, speaking, avatar }: { clip: Clip; speaking: boolean; avatar: 'off' | 'starting' | 'live' }) {
   const refs = useRef<Record<string, HTMLVideoElement | null>>({});
   useEffect(() => {
     const el = refs.current[clip];
@@ -88,6 +89,15 @@ function JordanVideo({ clip, speaking }: { clip: Clip; speaking: boolean }) {
           style={{ opacity: k === clip ? 1 : 0 }}
         />
       ))}
+      {/* Live, lip-synced Jordan. Carries Jordan's voice, so it is not muted. */}
+      <video
+        id={AVATAR_VIDEO_ID}
+        autoPlay
+        playsInline
+        aria-label="Jordan Ellis"
+        className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
+        style={{ opacity: avatar === 'live' ? 1 : 0 }}
+      />
       {/* the speaking ring sits above the video */}
       <div className={`pointer-events-none absolute inset-0 rounded-2xl transition-shadow duration-200 ${speaking ? 'shadow-[inset_0_0_0_3px_#8ab4f8]' : ''}`} />
     </div>
@@ -95,6 +105,7 @@ function JordanVideo({ clip, speaking }: { clip: Clip; speaking: boolean }) {
 }
 
 type CallProps = {
+  avatar: 'off' | 'starting' | 'live';
   status: CallStatus;
   lines: Line[];
   speaking: boolean;
@@ -162,7 +173,7 @@ export function Lobby({ typed, onJoin, onBack, stream, denied, camOn, setCamOn }
   );
 }
 
-export default function VideoCall({ status, lines, speaking, mood, elapsed, limit, typed, error, notes, onSend, onLeave, onMute, stream, camOn, setCamOn }: CallProps) {
+export default function VideoCall({ avatar, status, lines, speaking, mood, elapsed, limit, typed, error, notes, onSend, onLeave, onMute, stream, camOn, setCamOn }: CallProps) {
   const [muted, setMuted] = useState(false);
   const [cc, setCc] = useState(true);
   const [panel, setPanel] = useState<'none' | 'chat' | 'notes'>(typed ? 'chat' : 'none');
@@ -203,9 +214,9 @@ export default function VideoCall({ status, lines, speaking, mood, elapsed, limi
         {/* stage */}
         <div className="relative min-w-0 flex-1">
           <div className="absolute inset-0">
-            <JordanVideo clip={clip} speaking={talking} />
+            <JordanVideo clip={clip} speaking={talking} avatar={avatar} />
             <span className="absolute bottom-3 left-3 rounded bg-black/50 px-2 py-0.5 text-[13px]">Jordan Ellis</span>
-            {status === 'connecting' && <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/40 text-[15px] text-white/80">Connecting audio…</div>}
+            {(status === 'connecting' || status === 'idle') && <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/40 text-[15px] text-white/80">Connecting audio…</div>}
             {limit - elapsed <= 60 && live && <div className="toast-in absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-black/70 px-4 py-2 text-[13px]">Your next meeting starts in {Math.max(0, limit - elapsed)} seconds</div>}
 
             {/* captions */}

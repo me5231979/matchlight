@@ -27,12 +27,23 @@ export type StartOptions = {
   limit?: number;
   /** In a drill, end automatically after Jordan answers the manager once. */
   endAfterReply?: boolean;
+  /**
+   * Route Jordan's voice to a live avatar instead of the speakers. The avatar
+   * plays the audio itself, lip-synced. Call `speakers(true)` to fall back.
+   */
+  avatar?: { onAudio: (b64: string, sampleRate: number) => void; onTurnEnd: () => void; onInterrupt: () => void };
 };
 
 /**
  * One practice conversation with Jordan (ElevenLabs agent, Claude as the brain).
  * Voice by default; typed mode uses the same agent in text-only mode.
  */
+function rateOf(s: unknown): number {
+  // ElevenLabs agents default to 16 kHz PCM; read the negotiated rate when exposed.
+  const r = (s as { connection?: { outputFormat?: { sampleRate?: number } } } | null)?.connection?.outputFormat?.sampleRate;
+  return typeof r === 'number' && r > 0 ? r : 16000;
+}
+
 export function useJordan() {
   const [status, setStatus] = useState<CallStatus>('idle');
   const [lines, setLines] = useState<Line[]>([]);
@@ -109,7 +120,8 @@ export function useJordan() {
         if (!o.typed) await navigator.mediaDevices.getUserMedia({ audio: true });
         const s = await Conversation.startSession({
           agentId: AGENT_ID,
-          connectionType: o.typed ? 'websocket' : 'webrtc',
+          // The avatar needs raw audio chunks, which the websocket transport provides.
+          connectionType: o.typed || o.avatar ? 'websocket' : 'webrtc',
           textOnly: !!o.typed,
           overrides: o.typed ? { conversation: { textOnly: true } } : undefined,
           dynamicVariables: {
@@ -127,7 +139,12 @@ export function useJordan() {
             if (role === 'agent') setMood((m) => moodOf(message, m));
             if (text) push({ role: role === 'agent' ? 'jordan' : 'manager', text });
           },
-          onModeChange: ({ mode }) => setSpeaking(mode === 'speaking'),
+          onModeChange: ({ mode }) => {
+            setSpeaking(mode === 'speaking');
+            if (mode === 'listening') o.avatar?.onTurnEnd();
+          },
+          onAudio: o.avatar && !o.typed ? (b64: string) => o.avatar!.onAudio(b64, rateOf(session.current)) : undefined,
+          onInterruption: o.avatar && !o.typed ? () => o.avatar!.onInterrupt() : undefined,
           onError: (message) => setError(message || 'Something went wrong with the connection.'),
           onDisconnect: () => {
             window.clearInterval(timer.current);
@@ -137,6 +154,7 @@ export function useJordan() {
           },
         });
         session.current = s;
+        if (o.avatar && !o.typed) s.setVolume({ volume: 0 });
         const t0 = Date.now();
         timer.current = window.setInterval(() => {
           const secs = Math.floor((Date.now() - t0) / 1000);
@@ -167,6 +185,15 @@ export function useJordan() {
     [push],
   );
 
+  /** Play Jordan's voice through the speakers (on) or leave it to the avatar (off). */
+  const speakers = useCallback((on: boolean) => {
+    try {
+      session.current?.setVolume({ volume: on ? 1 : 0 });
+    } catch {
+      /* text mode */
+    }
+  }, []);
+
   const mute = useCallback((on: boolean) => {
     try {
       session.current?.setMicMuted(on);
@@ -192,7 +219,7 @@ export function useJordan() {
     [stop],
   );
 
-  return { status, lines, speaking, error, elapsed, mood, start, stop, send, volume, mute };
+  return { status, lines, speaking, error, elapsed, mood, start, stop, send, volume, mute, speakers };
 }
 
 export type ScoreResult = {

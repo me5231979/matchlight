@@ -10,6 +10,7 @@
     "typecheck": "tsc -b"
   },
   "dependencies": {
+    "@anam-ai/js-sdk": "^4.29.1",
     "@anthropic-ai/sdk": "^1.4.0",
     "@elevenlabs/client": "^1.33.0",
     "@react-three/fiber": "^8.17.10",

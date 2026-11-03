@@ -6,6 +6,7 @@ import { DEFAULT_PERSONA } from '../course/data';
 import { scoreTranscript, useJordan, type Line, type ScoreResult } from '../course/useJordan';
 import Desk, { MEDIA } from './Desk';
 import VideoCall, { CLIPS, Lobby, useCamera } from './VideoCall';
+import { useAvatar } from './useAvatar';
 import { BEFORE, CLUES, LATER, type Tier } from './world';
 import { TIER_COPY, decideTier, readSignals } from './outcome';
 
@@ -31,6 +32,8 @@ export default function SimApp() {
   const [camOn, setCamOn] = useState(false);
   const cam = useCamera(camOn, false);
   const j = useJordan();
+  const face = useAvatar();
+  const joining = useRef(0);
   const scored = useRef<Promise<Run> | null>(null);
 
   useEffect(() => {
@@ -60,8 +63,38 @@ export default function SimApp() {
   const join = (typed: boolean) => {
     setSaved((s) => ({ ...s, typed }));
     setStage('call');
-    void j.start({ firstLine: 'Hey. Sorry, I was just finishing something. You wanted to talk?', persona: DEFAULT_PERSONA, typed, limit: LIMIT });
+    joining.current += 1;
   };
+
+  // Once the call screen (and its video element) is up: bring Jordan's live face
+  // online first, then open the conversation so no words are lost. In chat mode,
+  // or if the face is unavailable, Jordan uses the recorded loops instead.
+  const joinTick = joining.current;
+  useEffect(() => {
+    if (stage !== 'call' || !joinTick) return;
+    let gone = false;
+    void (async () => {
+      const typed = saved.typed;
+      const live = !typed && (await face.start());
+      if (gone) return void face.stop();
+      void j.start({
+        firstLine: 'Hey. Sorry, I was just finishing something. You wanted to talk?',
+        persona: DEFAULT_PERSONA,
+        typed,
+        limit: LIMIT,
+        avatar: live ? { onAudio: face.feed, onTurnEnd: face.end, onInterrupt: face.interrupt } : undefined,
+      });
+    })();
+    return () => {
+      gone = true;
+    };
+  }, [stage, joinTick]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => face.mood(j.mood), [j.mood]); // eslint-disable-line react-hooks/exhaustive-deps
+  // If the face drops mid-call, put Jordan's voice back on the speakers.
+  useEffect(() => {
+    if (stage === 'call' && face.status === 'off' && j.status === 'live') j.speakers(true);
+  }, [face.status]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // When the call ends, time moves on. Scoring runs while two weeks pass.
   useEffect(() => {
@@ -70,6 +103,7 @@ export default function SimApp() {
     const lines = j.lines;
     const seen = clues;
     setCamOn(false);
+    void face.stop();
     scored.current = scoreTranscript(lines).then((r) => {
       const result = 'error' in r ? null : r;
       return { lines, result, error: 'error' in r ? r.error : undefined, tier: decideTier(lines, result), clues: seen, at: Date.now() };
@@ -128,7 +162,8 @@ export default function SimApp() {
           error={j.error}
           notes={saved.notes}
           onSend={j.send}
-          onLeave={() => void j.stop()}
+          onLeave={() => (void j.stop(), void face.stop())}
+          avatar={face.status}
           onMute={j.mute}
           stream={cam.stream}
           camOn={camOn && !cam.denied}
