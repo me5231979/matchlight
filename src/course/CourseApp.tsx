@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, CalendarPlus, Keyboard, Lock, Mic, RotateCcw } from 'lucide-react';
 import { Wordmark } from '../components/Nav';
 import CallPanel from './CallPanel';
+import { useMia } from '../sim/useMia';
 import { CoachNote, ScoreBars, TaggedTranscript, scoringMessage } from './Feedback';
 import { useJordan, scoreTranscript, type Line, type ScoreResult, type StartOptions } from './useJordan';
 import {
@@ -152,10 +153,26 @@ function ics(plan: Plan | undefined) {
 /* ------------------------------------------------------------------ */
 
 function useRound(typed: boolean) {
-  const j = useJordan();
+  const eleven = useJordan();
+  const mia = useMia();
+  const [engine, setEngine] = useState<'mia' | 'voice'>('voice');
   const [scoring, setScoring] = useState(false);
+  // Voice rounds use Mia (live face and voice). Chat rounds, or Mia unavailable, use ElevenLabs.
+  const j = engine === 'mia' ? { ...mia, volume: eleven.volume, send: eleven.send } : eleven;
 
-  const begin = useCallback((o: Omit<StartOptions, 'typed'>) => void j.start({ ...o, typed }), [j, typed]);
+  const begin = useCallback(
+    (o: Omit<StartOptions, 'typed'>) => {
+      void (async () => {
+        if (!typed) {
+          setEngine('mia');
+          if (await mia.start(o.limit ?? 180, { firstLine: o.firstLine, persona: o.persona, mode: o.mode, context: o.context, endAfterReply: o.endAfterReply })) return;
+        }
+        setEngine('voice');
+        void eleven.start({ ...o, typed });
+      })();
+    },
+    [eleven, mia, typed],
+  );
 
   const score = useCallback(async (lines: Line[], focus?: string): Promise<Run> => {
     setScoring(true);
@@ -164,7 +181,7 @@ function useRound(typed: boolean) {
     return 'error' in r ? { lines, result: null, error: r.error, at: Date.now() } : { lines, result: r, at: Date.now() };
   }, []);
 
-  return { j, begin, score, scoring };
+  return { j, begin, score, scoring, engine, mia };
 }
 
 function Round({
@@ -188,7 +205,7 @@ function Round({
   startLabel?: string;
   brief?: React.ReactNode;
 }) {
-  const { j, begin, score, scoring } = useRound(typed);
+  const { j, begin, score, scoring, engine, mia } = useRound(typed);
   const [phase, setPhase] = useState<'ready' | 'call' | 'done'>(run ? 'done' : 'ready');
   const managerSpoke = j.lines.some((l) => l.role === 'manager');
 
@@ -235,6 +252,7 @@ function Round({
           volume={j.volume}
           onSend={j.send}
           onEnd={() => void j.stop()}
+          video={engine === 'mia' ? (mia.video ? 'live' : 'starting') : undefined}
         />
         {(j.status === 'ended' || j.status === 'error') && !managerSpoke && (
           <div className="flex items-center gap-4">

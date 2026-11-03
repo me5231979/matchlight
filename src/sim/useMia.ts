@@ -4,6 +4,8 @@ import type { CallStatus, Line } from '../course/useJordan';
 type AnamClient = import('@anam-ai/js-sdk').AnamClient;
 
 export const AVATAR_VIDEO_ID = 'jordan-live';
+type StartOpts = { firstLine?: string; persona?: string; mode?: 'full' | 'drill'; context?: string; endAfterReply?: boolean };
+
 export const FIRST_LINE = 'Hey. Sorry, I was just finishing something. You wanted to talk?';
 
 /**
@@ -22,6 +24,7 @@ export function useMia() {
   /** Why the live video could not start (shown in the call so it can be fixed). */
   const [why, setWhy] = useState('');
   const client = useRef<AnamClient | null>(null);
+  const opts = useRef<StartOpts>({});
   const timer = useRef<number>();
   const quiet = useRef<number>();
 
@@ -41,14 +44,20 @@ export function useMia() {
 
   /** Resolves true once Mia is live; false means use the fallback. */
   const start = useCallback(
-    async (limit: number): Promise<boolean> => {
+    async (limit: number, o: StartOpts = {}): Promise<boolean> => {
+      const firstLine = o.firstLine || FIRST_LINE;
+      opts.current = o;
       setStatus('connecting');
       setLines([]);
       setError('');
       setElapsed(0);
       try {
         setWhy('');
-        const res = await fetch('/api/avatar', { method: 'POST' });
+        const res = await fetch('/api/avatar', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ persona: o.persona, mode: o.mode, context: o.context }),
+        });
         if (!res.ok) {
           const body = (await res.json().catch(() => ({}))) as { error?: string; status?: number; detail?: string };
           throw new Error(`token: ${body.error ?? res.status}${body.status ? ` ${body.status}` : ''}${body.detail ? ` ${body.detail}` : ''}`);
@@ -63,7 +72,7 @@ export function useMia() {
             .filter((m) => m.content.trim())
             .map((m) => ({ role: m.role === 'user' ? 'manager' : 'jordan', text: m.content.trim() }));
           // Make sure Jordan's opening line is in the transcript for scoring.
-          if (!mapped.length || mapped[0].text !== FIRST_LINE) mapped.unshift({ role: 'jordan', text: FIRST_LINE });
+          if (!mapped.length || mapped[0].text !== firstLine) mapped.unshift({ role: 'jordan', text: firstLine });
           setLines(mapped);
         });
         c.addListener(AnamEvent.MESSAGE_STREAM_EVENT_RECEIVED, (e) => {
@@ -93,9 +102,9 @@ export function useMia() {
         await c.streamToVideoElement(AVATAR_VIDEO_ID);
         if (!(await ready)) throw new Error('timeout: no session ready or video within 20s');
 
-        setLines([{ role: 'jordan', text: FIRST_LINE }]);
+        setLines([{ role: 'jordan', text: firstLine }]);
         setStatus('live');
-        void c.talk(FIRST_LINE).catch(() => {});
+        void c.talk(firstLine).catch(() => {});
         const t0 = Date.now();
         timer.current = window.setInterval(() => {
           const secs = Math.floor((Date.now() - t0) / 1000);
@@ -117,6 +126,15 @@ export function useMia() {
     },
     [stop],
   );
+
+  // Drills: once Jordan has answered the manager and finished speaking, close the round.
+  useEffect(() => {
+    if (!opts.current.endAfterReply || status !== 'live' || speaking) return;
+    const last = lines[lines.length - 1];
+    if (last?.role !== 'jordan' || !lines.some((l) => l.role === 'manager')) return;
+    const id = window.setTimeout(() => void stop(), 1200);
+    return () => window.clearTimeout(id);
+  }, [lines, speaking, status, stop]);
 
   const mute = useCallback((on: boolean) => {
     try {

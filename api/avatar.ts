@@ -15,9 +15,11 @@ const DEFAULT_VOICE_ID = '8cc80a30-4fc0-11f1-84b0-52bacf74fa75';
 // Anam issue an ephemeral token; without an LLM it issues a legacy token the SDK rejects.
 const DEFAULT_LLM_ID = '0934d97d-0c3a-4f33-91b0-5e136a0ef466';
 
-const PERSONA = 'Guarded but professional. Tired. Hoping this is quick.';
+const DEFAULT_PERSONA = 'Guarded but professional. Tired. Hoping this is quick.';
 
-const SYSTEM_PROMPT = `[ROLE]
+const clip = (v: unknown, n: number) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f]/g, ' ').slice(0, n).trim() : '');
+
+const prompt = (persona: string, mode: 'full' | 'drill', context: string) => `[ROLE]
 You are Jordan Ellis, a senior project coordinator who reports to the person you are talking to (your manager). You are on a video call for your weekly 1:1. Stay fully in character as Jordan for the entire call. Never mention that you are an AI, a simulation, or a role-play. Never coach, grade, or give the manager advice.
 
 [BACKGROUND: what is true, from Jordan's side]
@@ -26,8 +28,8 @@ You are Jordan Ellis, a senior project coordinator who reports to the person you
 - The real reasons, which you are embarrassed about and do NOT volunteer: since Priya left the team two months ago you have quietly absorbed most of her accounts (Mercer and Brightline), and your dad had a fall, so you are driving to his place three evenings a week. You are exhausted and afraid that asking for help will look like you cannot cope.
 
 [HOW JORDAN SHOWS UP TODAY]
-${PERSONA}
-
+${persona}
+${context ? `\n[EXTRA CONTEXT FROM THE MANAGER'S PRACTICE SETUP]\n${context}\n` : ''}${mode === 'drill' ? `\n[DRILL MODE]\nThe manager is practicing one move. After they respond, give exactly one natural reply in character, then stop and wait.\n` : ''}
 [HOW TO RESPOND TO THE MANAGER]
 - If the manager is vague, labels you ("you seem disengaged", "your attitude"), or lectures: get guarded. Deflect or defend ("I've been busy", "Everyone's slammed", "That deck wasn't only on me").
 - If the manager names a specific, factual observation (the dates, the deliverables) without judging you: acknowledge it is true, a little uncomfortably.
@@ -83,12 +85,17 @@ export async function POST(request: Request) {
   const avatarId = process.env.ANAM_AVATAR_ID;
   if (!apiKey || !avatarId) return json({ error: 'not_configured' }, 503);
 
+  const body = (await request.json().catch(() => ({}))) as { persona?: unknown; mode?: unknown; context?: unknown };
+  const persona = clip(body.persona, 600) || DEFAULT_PERSONA;
+  const mode = body.mode === 'drill' ? 'drill' : 'full';
+  const context = clip(body.context, 800);
+
   const face = await resolveAvatar(avatarId, apiKey);
   const personaConfig: Record<string, unknown> = {
     name: 'Jordan Ellis',
     avatarId: face.avatarId,
     voiceId: process.env.ANAM_VOICE_ID || face.voiceId || DEFAULT_VOICE_ID,
-    systemPrompt: SYSTEM_PROMPT,
+    systemPrompt: prompt(persona, mode, context),
     maxSessionLengthSeconds: 660,
   };
   personaConfig.llmId = process.env.ANAM_LLM_ID || DEFAULT_LLM_ID;

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Lightbulb, MessageSquareText, Mic, PhoneOff, Send, X } from 'lucide-react';
 import type { CallStatus, Line } from './useJordan';
 import { BEHAVIORS } from './data';
+import { AVATAR_VIDEO_ID } from '../sim/useMia';
+import { MEDIA } from '../sim/Desk';
 
 type Props = {
   status: CallStatus;
@@ -16,6 +18,8 @@ type Props = {
   onSend: (t: string) => void;
   onEnd: () => void;
   name?: string;
+  /** Mia's live video (Anam) in place of the orb. */
+  video?: 'starting' | 'live';
 };
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
@@ -24,7 +28,7 @@ const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '
  * The live call as a stage: Jordan is a glowing presence that breathes with
  * the voices, captions run like film subtitles, the time drains across the top.
  */
-export default function CallPanel({ status, lines, speaking, elapsed, limit, typed, error, hints, volume, onSend, onEnd, name = 'Jordan Ellis' }: Props) {
+export default function CallPanel({ status, lines, speaking, elapsed, limit, typed, error, hints, volume, onSend, onEnd, name = 'Jordan Ellis', video }: Props) {
   const core = useRef<HTMLDivElement>(null);
   const ring1 = useRef<HTMLDivElement>(null);
   const ring2 = useRef<HTMLDivElement>(null);
@@ -97,6 +101,13 @@ export default function CallPanel({ status, lines, speaking, elapsed, limit, typ
 
         {/* Jordan */}
         <div className="flex flex-1 flex-col items-center justify-center px-6 pb-4 pt-6">
+          {video ? (
+            <div className={`relative aspect-video w-full max-w-3xl overflow-hidden rounded-2xl bg-black transition-shadow ${speaking ? 'shadow-[0_0_0_3px_rgba(255,90,31,0.7)]' : 'shadow-[0_0_0_1px_rgba(245,242,236,0.12)]'}`}>
+              <img src={MEDIA.portrait} alt="" className="absolute inset-0 h-full w-full object-cover" />
+              <video id={AVATAR_VIDEO_ID} autoPlay playsInline aria-label={name} className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500" style={{ opacity: video === 'live' ? 1 : 0 }} />
+              {video === 'starting' && <span className="absolute inset-x-0 bottom-3 text-center text-[13px] text-bone/80">Connecting…</span>}
+            </div>
+          ) : (
           <div className="relative grid h-56 w-56 place-items-center md:h-64 md:w-64" aria-hidden>
             <div ref={ring2} className="absolute inset-0 rounded-full border border-ember/30" />
             <div ref={ring1} className="absolute inset-0 rounded-full border border-flare/40" />
@@ -111,6 +122,7 @@ export default function CallPanel({ status, lines, speaking, elapsed, limit, typ
               }}
             />
           </div>
+          )}
           <p className="mt-8 text-[22px] font-semibold tracking-[-0.01em] text-bone">{name}</p>
           <p className="mt-1 flex items-center gap-2 text-ash" role="status" aria-live="polite">
             {!typed && live && !speaking && <Mic size={15} strokeWidth={1.5} className="text-ember" aria-hidden />}
