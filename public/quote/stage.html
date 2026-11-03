@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Your Quote · Matchlight</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@1&display=swap">
+<style>
+/* Client view: what the client sees on the call. Big numbers, plain scope, no internal costs. */
+:root {
+  color-scheme: light;
+  --paper: #FFFFFF;
+  --wash: #F6F4F0;
+  --ink: #0E0E0C;
+  --body: #3A3833;
+  --mute: #7A766E;
+  --rule: #E7E3DC;
+  --ember: #E8501A;
+  --sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--paper); color: var(--body); font: 16px/1.55 var(--sans); }
+.wrap { max-width: 1100px; margin: 0 auto; padding-block: 40px 64px; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.brand { font-weight: 600; color: var(--ink); letter-spacing: -.03em; font-size: 18px; }
+.brand span { color: var(--ember); margin-right: 6px; }
+.mono { font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+h1 { font-size: clamp(32px, 5vw, 56px); line-height: 1.02; letter-spacing: -.035em; color: var(--ink); margin: 12px 0 0; font-weight: 600; text-wrap: balance; }
+h1 em { font-family: var(--serif); font-weight: 400; color: var(--ember); }
+.sub { color: var(--mute); margin-top: 8px; }
+.totals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 32px; }
+@media (max-width: 680px) { .totals { grid-template-columns: minmax(0, 1fr); } }
+.t { background: var(--wash); border-radius: 20px; padding: 24px; }
+.t .v { font-size: clamp(36px, 5vw, 52px); font-weight: 600; letter-spacing: -.035em; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.1; margin-top: 6px; }
+.t .s { color: var(--mute); font-size: 14px; margin-top: 4px; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 32px; margin-top: 36px; }
+@media (max-width: 780px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+h2 { font-size: 18px; color: var(--ink); margin: 0 0 10px; letter-spacing: -.01em; }
+ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+td { padding: 9px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+td.n { text-align: right; white-space: nowrap; color: var(--ink); }
+td small { display: block; color: var(--mute); font-size: 13px; }
+.wait { display: grid; place-items: center; min-height: 60vh; text-align: center; color: var(--mute); }
+.foot { margin-top: 40px; color: var(--mute); font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><span>/</span>matchlight</div>
+  <div id="view"><div class="wait"><p>Waiting for the quote to load…</p></div></div>
+</div>
+<script>
+(function () {
+  var usd = function (n) { return '$' + Math.round(n || 0).toLocaleString('en-US'); };
+  var esc = function (x) { return String(x == null ? '' : x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+
+  function render(q) {
+    if (!q) return;
+    var ongoing = q.ongoing > 0;
+    var lines = (q.lines || []).map(function (l) { return '<tr><td>' + esc(l[0]) + '<small>' + esc(l[1]) + '</small></td><td class="n">' + usd(l[2]) + '</td></tr>'; }).join('');
+    var direct = (q.direct || []).map(function (d) { return '<tr><td>' + esc(d[0]) + '</td><td class="n">' + usd(d[1]) + '/mo</td></tr>'; }).join('');
+    document.getElementById('view').innerHTML =
+      '<p class="mono" style="margin-top:28px">Proposal' + (q.client ? ' for ' + esc(q.client) : '') + '</p>' +
+      '<h1>' + esc(q.project || 'Your simulation') + '</h1>' +
+      '<p class="sub">' + esc(q.delivery || '') + '</p>' +
+      '<div class="totals">' +
+        '<div class="t"><div class="mono">One-time build</div><div class="v">' + usd(q.build) + '</div><div class="s">' + (q.scenarios ? q.scenarios + ' scenario' + (q.scenarios === 1 ? '' : 's') : 'Scope in progress') + '</div></div>' +
+        '<div class="t"><div class="mono">' + (q.handover ? 'Support from Matchlight' : 'Ongoing') + '</div><div class="v">' + (ongoing ? usd(q.ongoing) + '<span style="font-size:.45em;color:var(--mute)"> /yr</span>' : 'None') + '</div><div class="s">' +
+          (ongoing ? (q.monthly ? usd(q.month) + ' per month' : 'Billed annually') + (q.learners ? ', up to ' + q.learners + ' learners' : '') : q.handover ? 'You own it and run it on your accounts' : 'Runs in your LMS with no ongoing fee') + '</div></div>' +
+      '</div>' +
+      '<div class="cols">' +
+        '<div><h2>What we build</h2>' + ((q.scope || []).length ? '<ul>' + q.scope.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '<p class="sub">We are shaping this together now.</p>') +
+          (q.handover ? '<h2 style="margin-top:24px">You receive</h2><ul><li>Git repositories with full source code</li><li>Design files and media assets</li><li>Setup guide for your accounts and API keys</li><li>A handover session with your team</li></ul>' : '') + '</div>' +
+        '<div>' + (lines ? '<h2>' + (q.handover ? 'Support' : 'Ongoing includes') + '</h2><table>' + lines + '</table>' : '') +
+          (direct ? '<h2 style="margin-top:24px">Your direct vendor costs (estimate)</h2><table>' + direct + '<tr><td><b>About</b></td><td class="n"><b>' + usd(q.directMonth) + '/mo</b></td></tr></table>' : '') + '</div>' +
+      '</div>' +
+      '<p class="foot">Figures update live as we talk. A written proposal follows the call.</p>';
+  }
+
+  // Same browser: the builder broadcasts every change.
+  if ('BroadcastChannel' in window) {
+    var ch = new BroadcastChannel('ml-quote');
+    ch.onmessage = function (e) { if (e.data && typeof e.data === 'object') render(e.data); };
+    ch.postMessage('ready');
+  }
+
+  // Google Meet main stage: the side panel sends the quote as a frame message.
+  var qs = new URLSearchParams(location.search);
+  if (qs.get('meet') === '1') {
+    import('https://cdn.jsdelivr.net/npm/@googleworkspace/meet-addons@1.2.0/meet.addons.mjs').then(function (m) {
+      return m.meet.addon.createAddonSession({ cloudProjectNumber: qs.get('project') || '' });
+    }).then(function (s) { return s.createMainStageClient(); }).then(function (client) {
+      client.on('frameToFrameMessage', function (msg) { try { render(JSON.parse(msg.payload)); } catch (e) {} });
+      client.notifySidePanel('ready').catch(function () {});
+    }).catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

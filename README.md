@@ -86,3 +86,26 @@ Vercel environment variables:
 - `ANAM_AVATAR_ID`: Mia's avatar ID
 - `ANAM_VOICE_ID` (optional): defaults to Mia's voice
 - `ANAM_LLM_ID` (optional): the Anam LLM to run Jordan; Anam's default is used if unset
+
+## Quote builder (`/quote`)
+
+Internal tool for pricing a build with a client: five steps, a flat build fee and an ongoing fee.
+Not indexed (robots and `X-Robots-Tag`). Set `QUOTE_ACCESS_CODE` in Vercel to require a team code.
+
+Autofill:
+- **Meeting notes**: paste Gemini notes, a transcript or an email into "Autofill from a meeting". `/api/quote-intake`
+  sends it to Claude (needs `ANTHROPIC_API_KEY`) and fills the form, with the quotes it used and questions still to ask.
+- **Feeds** (Zapier, Make, a CRM): `POST /api/quote-intake` with header `x-quote-code` and either
+  `{ "text": "notes..." }` or `{ "fields": { "client": "...", "learners": 50, "delivery": "hosted", "features": { "coach": true } } }`.
+  The response includes `link`, which opens the builder pre-filled (`/quote#prefill=...`).
+- **Embedding**: a page that frames `/quote` can send `postMessage({ type: 'matchlight-quote-prefill', fields }, '*')`.
+- **Client view**: "Open client view" opens `/quote/stage.html`, a clean version of the quote with no internal costs
+  that updates live. Share that window on any call.
+
+Google Meet add-on:
+1. In Google Cloud, create a project, enable the Google Workspace Marketplace SDK, and note the project number.
+2. Add a Meet add-on deployment whose side panel URL is
+   `https://matchlight-two.vercel.app/quote?meet=1&project=<PROJECT_NUMBER>` and whose main stage URL is
+   `https://matchlight-two.vercel.app/quote/stage.html?meet=1&project=<PROJECT_NUMBER>`.
+3. Install it for your team (private listing). In a meeting, open Activities, choose the add-on, build the quote in the
+   side panel, and press "Present to client" to put the client view on the main stage.

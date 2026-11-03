@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Matchlight Quote Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@1&display=swap">
+<style>
+/* Layout: a five-step quote wizard on the left, a live quote that follows you on the right. Light, paper-white, Matchlight ember accent. */
+:root {
+  color-scheme: light;
+  --paper: #FFFFFF;
+  --wash: #F6F4F0;
+  --ink: #0E0E0C;
+  --body: #3A3833;
+  --mute: #7A766E;
+  --rule: #E7E3DC;
+  --ember: #E8501A;
+  --ember-wash: #FFF1EA;
+  --good: #2F7D4A;
+  --warn: #A86A00;
+  --sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --serif: 'Instrument Serif', Georgia, serif;
+  --mono: 'Geist Mono', ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--body); font-family: var(--sans); font-size: 15px; line-height: 1.55; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-block: 36px 96px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.top { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.brand { font-weight: 600; color: var(--ink); letter-spacing: -.03em; font-size: 18px; }
+.brand span { color: var(--ember); margin-right: 6px; }
+.mono { font-family: var(--mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+h1 { font-size: clamp(30px, 4.6vw, 48px); line-height: 1.04; letter-spacing: -.035em; color: var(--ink); font-weight: 600; margin: 18px 0 0; text-wrap: balance; }
+h1 em { font-family: var(--serif); font-weight: 400; letter-spacing: -.01em; color: var(--ember); }
+.lede { max-width: 66ch; margin: 12px 0 0; color: var(--body); }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 32px; margin-top: 32px; align-items: start; }
+@media (max-width: 920px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 20px; }
+.steps button { font: 500 13px var(--sans); border: 1px solid var(--rule); background: var(--paper); color: var(--mute); padding: 7px 12px; border-radius: 999px; cursor: pointer; }
+.steps button[aria-current="step"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.steps button.done { color: var(--ink); }
+.steps button:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--ember); outline-offset: 2px; }
+.card { border: 1px solid var(--rule); border-radius: 18px; padding: 24px; background: var(--paper); min-width: 0; }
+.card h2 { font-size: 22px; letter-spacing: -.02em; color: var(--ink); margin: 0; font-weight: 600; }
+.card .hint { color: var(--mute); margin: 6px 0 0; font-size: 14px; max-width: 64ch; }
+.stack { display: grid; gap: 14px; margin-top: 20px; }
+.choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 18px; }
+@media (max-width: 720px) { .choices { grid-template-columns: minmax(0, 1fr); } }
+.choice { position: relative; border: 1.5px solid var(--rule); border-radius: 14px; padding: 16px; cursor: pointer; display: grid; gap: 4px; background: var(--paper); }
+.choice:has(input:checked) { border-color: var(--ember); background: var(--ember-wash); }
+.choice input { position: absolute; opacity: 0; pointer-events: none; }
+.choice:has(input:focus-visible) { outline: 2px solid var(--ember); outline-offset: 2px; }
+.choice b { color: var(--ink); font-weight: 600; }
+.choice span { color: var(--mute); font-size: 13px; line-height: 1.4; }
+.row { display: grid; grid-template-columns: minmax(0, 1fr) 150px; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--rule); }
+.row:last-child { border-bottom: 0; }
+.row label { color: var(--ink); }
+.row label small { display: block; color: var(--mute); font-size: 12.5px; }
+.field { position: relative; }
+.field .u { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--mute); font: 12px var(--mono); pointer-events: none; }
+input[type=number], input[type=text], input[type=password], select { width: 100%; border: 1px solid var(--rule); border-radius: 10px; padding: 8px 10px; font: 500 14px var(--sans); color: var(--ink); background: var(--paper); }
+input[type=number] { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.feat { display: grid; grid-template-columns: 22px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px 0; border-bottom: 1px solid var(--rule); cursor: pointer; }
+.feat:last-child { border-bottom: 0; }
+.feat input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ember); }
+.feat b { color: var(--ink); font-weight: 500; }
+.feat small { display: block; color: var(--mute); font-size: 12.5px; }
+.feat .d { font: 500 12px var(--mono); color: var(--mute); white-space: nowrap; padding-top: 3px; }
+.tag { display: inline-block; font: 500 10.5px var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 2px 7px; border-radius: 999px; background: var(--wash); color: var(--mute); margin-left: 6px; vertical-align: 2px; }
+.tag.ai { background: #EEF3FF; color: #2F4FB0; }
+.nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; }
+.btn { font: 500 14px var(--sans); border-radius: 999px; padding: 10px 18px; cursor: pointer; border: 1px solid var(--ink); background: var(--ink); color: var(--paper); }
+.btn.ghost { background: var(--paper); color: var(--ink); border-color: var(--rule); }
+.btn[disabled] { opacity: .35; cursor: default; }
+aside.quote { position: sticky; top: max(16px, env(safe-area-inset-top, 0px)); display: grid; gap: 14px; }
+.total { border-radius: 18px; padding: 22px; background: var(--wash); }
+.total .k { font: 500 11px var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--mute); }
+.total .v { font-size: 34px; font-weight: 600; letter-spacing: -.03em; color: var(--ink); font-variant-numeric: tabular-nums; margin-top: 2px; }
+.total .s { color: var(--mute); font-size: 13px; }
+.total + .total { margin-top: -4px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+.split div { background: var(--paper); border-radius: 12px; padding: 10px 12px; }
+.split .v { font-size: 20px; }
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+td, th { padding: 9px 4px; border-bottom: 1px solid var(--rule); font-size: 14px; text-align: left; vertical-align: top; }
+th { font: 500 11px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+td.n, th.n { text-align: right; white-space: nowrap; }
+td small { display: block; color: var(--mute); font-size: 12px; }
+tr.sum td { font-weight: 600; color: var(--ink); border-bottom: 0; }
+.internal { color: var(--good); }
+.pill { display: inline-block; font: 500 11px var(--mono); padding: 2px 8px; border-radius: 999px; }
+.pill.ok { background: #EAF5EE; color: var(--good); }
+.pill.warn { background: #FFF4DE; color: var(--warn); }
+.toggle { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--mute); cursor: pointer; }
+.toggle input { accent-color: var(--ember); }
+textarea { width: 100%; min-height: 220px; border: 1px solid var(--rule); border-radius: 12px; padding: 14px; font: 13px/1.55 var(--mono); color: var(--ink); background: var(--wash); resize: vertical; }
+details { border: 1px solid var(--rule); border-radius: 14px; padding: 14px 16px; margin-top: 18px; }
+details summary { cursor: pointer; color: var(--ink); font-weight: 500; }
+.note { font-size: 12.5px; color: var(--mute); margin-top: 14px; max-width: 80ch; }
+.note a { color: var(--body); }
+.empty { color: var(--mute); font-size: 13px; }
+.status { font-size: 13px; color: var(--good); min-height: 1.2em; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.auto { border: 1px dashed color-mix(in srgb, var(--ember) 55%, var(--rule)); background: var(--ember-wash); border-radius: 18px; padding: 18px 20px; margin-bottom: 18px; }
+.auto summary { cursor: pointer; color: var(--ink); font-weight: 600; list-style: none; display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.auto summary::-webkit-details-marker { display: none; }
+.auto textarea { min-height: 140px; background: var(--paper); font-family: var(--sans); font-size: 14px; margin-top: 12px; }
+.auto .bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+.found { margin-top: 14px; display: grid; gap: 10px; }
+.found ul { margin: 4px 0 0; padding-left: 18px; font-size: 13.5px; }
+.found li q { color: var(--mute); }
+.filled { box-shadow: 0 0 0 2px var(--ember) !important; transition: box-shadow 1.2s; }
+.gate { position: fixed; inset: 0; background: var(--paper); display: grid; place-items: center; z-index: 50; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.gate form { width: min(380px, 100%); display: grid; gap: 12px; }
+.err { color: #B3261E; font-size: 13px; min-height: 1.2em; }
+body.meet .wrap { padding-block: 12px 40px; }
+body.meet h1, body.meet .lede, body.meet .top { display: none; }
+body.meet .layout { grid-template-columns: minmax(0, 1fr); margin-top: 0; }
+body.meet aside.quote { position: static; order: -1; }
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate" hidden>
+  <form id="gateForm">
+    <div class="brand"><span>/</span>matchlight</div>
+    <label for="code" style="color:var(--ink);font-weight:500">Team access code</label>
+    <input id="code" type="password" autocomplete="current-password" required>
+    <button class="btn" type="submit">Open the quote builder</button>
+    <p class="err" id="gateErr" role="alert"></p>
+  </form>
+</div>
+<div class="wrap">
+  <div class="top">
+    <div class="brand"><span>/</span>matchlight</div>
+    <div class="mono">Quote builder · internal</div>
+  </div>
+  <h1>Build a quote <em>with</em> the client.</h1>
+  <p class="lede">Walk through five steps together. You get a flat one-time build fee and an ongoing fee that only includes what this build actually needs: hosting, AI credits, analytics and maintenance. A straight SCORM build with no AI has no ongoing cost.</p>
+
+  <div class="layout">
+    <main>
+      <details class="auto" id="auto">
+        <summary><span>Autofill from a meeting</span><span class="mono" style="color:var(--ember)">Notes, transcript or email</span></summary>
+        <p class="hint" style="margin:8px 0 0;color:var(--body)">Paste Gemini notes from Google Meet, a call transcript, or the client's email. Claude fills in what was discussed and lists what to ask next. You can change anything afterwards.</p>
+        <label for="notes" class="sr-only" style="position:absolute;left:-9999px">Meeting notes</label>
+        <textarea id="notes" placeholder="Paste notes or a transcript here"></textarea>
+        <div class="bar">
+          <button type="button" class="btn" id="fill">Fill the form</button>
+          <button type="button" class="btn ghost" id="share">Copy prefill link</button>
+          <button type="button" class="btn ghost" id="present">Open client view</button>
+          <span class="status" id="autoStatus" role="status"></span>
+        </div>
+        <div class="found" id="found" hidden></div>
+      </details>
+      <nav class="steps" aria-label="Quote steps" id="steps"></nav>
+
+      <form id="f" autocomplete="off" onsubmit="return false">
+        <!-- 1 -->
+        <section class="card" data-step="0">
+          <h2>Client and delivery</h2>
+          <p class="hint">Where the experience lives decides what runs after launch.</p>
+          <div class="stack">
+            <div class="row"><label for="client">Client name</label><input id="client" type="text" value="" placeholder="Client name"></div>
+            <div class="row"><label for="project">Project<small>Shown on the quote</small></label><input id="project" type="text" value="" placeholder="Project name"></div>
+          </div>
+          <div class="choices" role="radiogroup" aria-label="Delivery">
+            <label class="choice"><input type="radio" name="delivery" value="scorm"><b>SCORM package</b><span>Runs inside the client's LMS. We hand over files. No hosting.</span></label>
+            <label class="choice"><input type="radio" name="delivery" value="scormai"><b>SCORM with AI</b><span>Runs in their LMS, but calls our AI service for voice, avatar or coaching.</span></label>
+            <label class="choice"><input type="radio" name="delivery" value="hosted"><b>Hosted by Matchlight</b><span>We host the experience on the web, with links or SSO.</span></label>
+          </div>
+        </section>
+
+        <!-- 2 -->
+        <section class="card" data-step="1" hidden>
+          <h2>What we're building</h2>
+          <p class="hint">Tick what's in scope. Days are our estimate; adjust the day rate or the scenario count to match the conversation.</p>
+          <div class="stack">
+            <div class="row"><label for="scenarios">Scenarios<small>Each: script, character, rubric, branching</small></label><input id="scenarios" type="number" min="0" step="1" value="" placeholder="0"></div>
+          </div>
+          <div id="features" style="margin-top:8px"></div>
+        </section>
+
+        <!-- 3 -->
+        <section class="card" data-step="2" hidden>
+          <h2>How much it will be used</h2>
+          <p class="hint" id="usageHint">Only AI features cost money per use. These drive the AI credits on the ongoing fee.</p>
+          <div class="stack" id="usage">
+            <div class="row"><label for="learners">Learners</label><input id="learners" type="number" min="1" step="5" value="" placeholder="0"></div>
+            <div class="row"><label for="rounds">AI practice rounds per learner per month</label><input id="rounds" type="number" min="0" step="0.5" value="" placeholder="0"></div>
+            <div class="row"><label for="minutes">Minutes per round</label><input id="minutes" type="number" min="1" step="1" value="" placeholder="0"></div>
+            <div class="row"><label for="months">Active months per year<small>Programs often run in cohorts</small></label><input id="months" type="number" min="1" max="12" step="1" value="12"></div>
+          </div>
+        </section>
+
+        <!-- 4 -->
+        <section class="card" data-step="3" hidden>
+          <h2>After launch</h2>
+          <p class="hint">Whose accounts the AI and hosting run on, and who pays the vendors.</p>
+          <div class="choices" role="radiogroup" aria-label="Ownership after launch" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+            <label class="choice"><input type="radio" name="own" value="managed" checked><b>We run it</b><span>Built and run on Matchlight accounts. Hosting, AI credits and analytics roll into one ongoing fee.</span></label>
+            <label class="choice"><input type="radio" name="own" value="handover"><b>Client's keys, handed over</b><span>The client provides their own API keys before the build and pays vendors directly from day one. At the end they get the repositories, source files and setup guide.</span></label>
+          </div>
+          <div class="stack">
+            <div class="row"><label for="maint" id="maintLabel">Maintenance plan</label>
+              <select id="maint">
+                <option value="none">None</option>
+                <option value="essentials">Essentials: monitoring, vendor accounts, fixes (1 hr/mo)</option>
+                <option value="standard">Standard: plus quarterly content updates (3 hrs/mo)</option>
+                <option value="premium">Premium: plus monthly reporting and tuning (8 hrs/mo)</option>
+              </select>
+            </div>
+            <div class="row"><label for="analytics">Analytics</label>
+              <select id="analytics">
+                <option value="none">None (LMS reporting only)</option>
+                <option value="basic">Basic: usage and completion dashboard</option>
+                <option value="lrs">Learning record store: xAPI statements and behavior scores</option>
+              </select>
+            </div>
+            <div class="row"><label for="billing">Billing</label>
+              <select id="billing">
+                <option value="annual" selected>Annual, paid up front</option>
+                <option value="monthly">Monthly (10% higher)</option>
+              </select>
+            </div>
+          </div>
+          <details>
+            <summary>Rates and assumptions</summary>
+            <p class="note" style="margin-top:8px">Our costs, used to price the ongoing fee. Confirm vendor rates against your current plans.</p>
+            <div class="stack" id="rates"></div>
+          </details>
+        </section>
+
+        <!-- 5 -->
+        <section class="card" data-step="4" hidden>
+          <h2>The quote</h2>
+          <p class="hint">Copy this into the proposal. Turn on internal view to see our costs and margin before you send it.</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px">
+            <label class="toggle"><input type="checkbox" id="internal"> Internal view</label>
+            <div style="display:flex;gap:10px;align-items:center"><span class="status" id="copied" role="status"></span><button type="button" class="btn" id="copy">Copy quote</button></div>
+          </div>
+          <div style="margin-top:16px;overflow-x:auto"><table id="detail"></table></div>
+          <textarea id="text" readonly aria-label="Quote text" style="margin-top:18px"></textarea>
+        </section>
+
+        <div class="nav">
+          <button type="button" class="btn ghost" id="back">Back</button>
+          <button type="button" class="btn" id="next">Next</button>
+        </div>
+      </form>
+    </main>
+
+    <aside class="quote" aria-live="polite">
+      <div class="total"><div class="k">One-time build</div><div class="v" id="qBuild"></div><div class="s" id="qBuildNote"></div></div>
+      <div class="total"><div class="k">Ongoing</div><div class="v" id="qRun"></div><div class="s" id="qRunNote"></div>
+        <div class="split"><div><div class="k">Per month</div><div class="v" id="qMonth"></div></div><div><div class="k">Per learner / yr</div><div class="v" id="qLearner"></div></div></div>
+      </div>
+      <div class="card" style="padding:18px"><div class="k mono" style="margin-bottom:6px">Ongoing includes</div><table id="side"></table></div>
+    </aside>
+  </div>
+
+  <p class="note">Vendor rates are assumptions: Anam overage about $0.11 to $0.16 per minute with plans that include minutes (<a href="https://aidirectory.com/anam" target="_blank" rel="noopener">AI Directory</a>, <a href="https://www.g2.com/products/anam/pricing" target="_blank" rel="noopener">G2</a>); ElevenLabs Agents about $0.08 to $0.10 per minute plus LLM after its May 2026 price change (<a href="https://www.getmacha.com/blog/elevenlabs-agents-pricing-explained" target="_blank" rel="noopener">Macha</a>, <a href="https://www.usagepricing.com/blueprint/activity/elevenlabs-2026-05-07-conversational-ai-price-cut" target="_blank" rel="noopener">UsagePricing</a>). Claude scoring is estimated per scored round. Edit everything under Rates and assumptions.</p>
+</div>
+
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var KEY = 'ml-quote-v3';
+
+  var FEATURES = [
+    { id: 'discovery', name: 'Discovery and learning design', note: 'Goals, behaviors, rubric, research basis', days: 3, on: false },
+    { id: 'world', name: 'Simulated workplace', note: 'Desk with email, chat, calendar and files that hold clues', days: 4, on: false },
+    { id: 'avatar', name: 'Live video character', note: 'Lip-synced avatar on a video call (Anam)', days: 2, on: false, ai: 'anam' },
+    { id: 'voice', name: 'Voice conversation', note: 'Talk out loud with the character (ElevenLabs), plus chat mode', days: 2, on: false, ai: 'eleven' },
+    { id: 'coach', name: 'AI coaching and scoring', note: 'Behavior scores, quotes, what to try next (Claude)', days: 3, on: false, ai: 'claude' },
+    { id: 'consequence', name: 'Consequences and debrief', note: 'Two weeks later, causal debrief', days: 2, on: false },
+    { id: 'drills', name: 'Practice drills and harder variants', note: 'One-move drills, three difficulty levels, plan rehearsal', days: 3, on: false },
+    { id: 'brand', name: 'Client branding', note: 'Their colors, type, logo and fictional or real world', days: 1.5, on: false },
+    { id: 'scorm', name: 'SCORM packaging and LMS testing', note: 'Package, test in their LMS, completion and score', days: 2, on: false, scorm: true },
+    { id: 'xapi', name: 'xAPI reporting', note: 'Behavior-level statements to an LRS', days: 2, on: false },
+    { id: 'custom', name: 'Custom character and voice', note: 'Their own face and voice instead of a stock character', days: 3, on: false },
+  ];
+
+  var RATES = [
+    ['dayRate', 'Build day rate', '$', 1400, 50],
+    ['qa', 'QA, accessibility and project management', '%', 20, 1],
+    ['buildPass', 'AI and asset costs during the build', '$', 300, 50],
+    ['anamMin', 'Anam per minute', '$/min', 0.14, 0.01],
+    ['anamPlan', 'Anam plan per year (shared)', '$', 2000, 100],
+    ['elevenMin', 'ElevenLabs per minute, incl. LLM', '$/min', 0.10, 0.01],
+    ['elevenPlan', 'ElevenLabs plan per month (shared)', '$', 99, 1],
+    ['elevenShare', 'Minutes on ElevenLabs when avatar is on', '%', 15, 5],
+    ['claudeRound', 'Claude per scored round', '$', 0.06, 0.01],
+    ['clients', 'Active clients sharing vendor plans', '#', 8, 1],
+    ['vercel', 'Hosting per client per month (Vercel)', '$', 25, 5],
+    ['proxy', 'AI service hosting for SCORM per month', '$', 15, 5],
+    ['anaBasic', 'Basic analytics per month', '$', 20, 5],
+    ['anaLrs', 'Learning record store per month', '$', 120, 10],
+    ['hourRate', 'Maintenance hourly rate', '$', 125, 5],
+    ['markup', 'Markup on AI usage and vendor costs', '×', 1.5, 0.1],
+  ];
+  var MAINT_HOURS = { none: 0, essentials: 1, standard: 3, premium: 8 };
+
+  // Build the dynamic parts of the form.
+  $('features').innerHTML = FEATURES.map(function (f) {
+    return '<label class="feat"><input type="checkbox" id="ft_' + f.id + '"' + (f.on ? ' checked' : '') + '><span><b>' + f.name + '</b>' +
+      (f.ai ? '<span class="tag ai">AI · ongoing cost</span>' : '') + (f.scorm ? '<span class="tag">SCORM</span>' : '') +
+      '<small>' + f.note + '</small></span><span class="d">' + f.days + ' d</span></label>';
+  }).join('');
+  $('rates').innerHTML = RATES.map(function (r) {
+    return '<div class="row"><label for="r_' + r[0] + '">' + r[1] + '</label><div class="field"><span class="u">' + r[2] + '</span><input id="r_' + r[0] + '" type="number" min="0" step="' + r[4] + '" value="' + r[3] + '"></div></div>';
+  }).join('');
+
+  function applyState(obj, mark) {
+    Object.keys(obj || {}).forEach(function (k) {
+      var v = obj[k];
+      if (v === null || v === undefined) return;
+      var el;
+      if (k === 'delivery' || k === 'own') { el = document.querySelector('input[name=' + k + '][value="' + v + '"]'); if (el) el.checked = true; el = el && el.closest('.choice'); }
+      else if ((el = $(k))) { if (el.type === 'checkbox') el.checked = !!v; else el.value = v; }
+      if (mark && el) { el.classList.add('filled'); setTimeout(function () { el.classList.remove('filled'); }, 2500); }
+    });
+  }
+  // Fields from the intake API or a feed use friendly names; map them to form ids.
+  function fromFields(f) {
+    var o = {};
+    ['client', 'project', 'delivery', 'scenarios', 'learners', 'rounds', 'minutes', 'months', 'maint', 'analytics', 'billing'].forEach(function (k) { if (f[k] !== undefined) o[k] = f[k]; });
+    if (f.ownership) o.own = f.ownership;
+    if (f.features) Object.keys(f.features).forEach(function (k) { if (f.features[k] !== null && f.features[k] !== undefined) o['ft_' + k] = f.features[k]; });
+    return o;
+  }
+  function currentFields() {
+    var f = { features: {} };
+    ['client', 'project', 'scenarios', 'learners', 'rounds', 'minutes', 'months', 'maint', 'analytics', 'billing'].forEach(function (k) { var v = $(k).value; if (v !== '') f[k] = /^(scenarios|learners|rounds|minutes|months)$/.test(k) ? Number(v) : v; });
+    var d = document.querySelector('input[name=delivery]:checked'); if (d) f.delivery = d.value;
+    var o = document.querySelector('input[name=own]:checked'); if (o) f.ownership = o.value;
+    FEATURES.forEach(function (x) { f.features[x.id] = $('ft_' + x.id).checked; });
+    return f;
+  }
+
+  // Restore saved state, then any prefill handed to us in the link.
+  try { applyState(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (e) {}
+  var prefill = /[#&]prefill=([^&]+)/.exec(location.hash);
+  if (prefill) {
+    try {
+      var b64 = prefill[1].replace(/-/g, '+').replace(/_/g, '/');
+      applyState(fromFields(JSON.parse(decodeURIComponent(escape(atob(b64))))), true);
+      history.replaceState(null, '', location.pathname + location.search);
+    } catch (e) {}
+  }
+
+  var STEPS = ['Client', 'Build', 'Usage', 'Ongoing', 'Quote'];
+  var step = 0;
+  function renderSteps() {
+    $('steps').innerHTML = STEPS.map(function (s, i) {
+      return '<button type="button" data-i="' + i + '"' + (i === step ? ' aria-current="step"' : '') + (i < step ? ' class="done"' : '') + '>' + (i + 1) + '. ' + s + '</button>';
+    }).join('');
+    document.querySelectorAll('section[data-step]').forEach(function (s) { s.hidden = Number(s.dataset.step) !== step; });
+    $('back').disabled = step === 0;
+    $('next').textContent = step === STEPS.length - 1 ? 'Start over' : 'Next';
+  }
+  $('steps').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) { step = Number(b.dataset.i); renderSteps(); } });
+  $('back').addEventListener('click', function () { if (step > 0) { step--; renderSteps(); } });
+  $('next').addEventListener('click', function () {
+    if (step < STEPS.length - 1) { step++; renderSteps(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    else { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); }
+  });
+
+  var num = function (id) { var x = parseFloat($(id).value); return isFinite(x) ? x : 0; };
+  var rate = function (k) { return num('r_' + k); };
+  var usd = function (n) { return '$' + Math.round(n).toLocaleString('en-US'); };
+  var usd2 = function (n) { return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); };
+  var roundTo = function (n, s) { return Math.ceil(n / s) * s; };
+
+  function calc() {
+    var delivery = (document.querySelector('input[name=delivery]:checked') || {}).value || '';
+    var on = {};
+    FEATURES.forEach(function (f) { on[f.id] = $('ft_' + f.id).checked; });
+    // SCORM delivery implies packaging.
+    if ((delivery === 'scorm' || delivery === 'scormai') && !on.scorm) { $('ft_scorm').checked = true; on.scorm = true; }
+    var ai = on.avatar || on.voice || on.coach;
+    if (delivery === 'scorm' && ai) { delivery = 'scormai'; document.querySelector('input[name=delivery][value=scormai]').checked = true; }
+
+    // ---- Build fee
+    var scen = Math.max(0, Math.round(num('scenarios')));
+    var days = 0, buildLines = [];
+    FEATURES.forEach(function (f) {
+      if (!on[f.id]) return;
+      var d = f.days;
+      if (f.id === 'discovery') d += 0;
+      buildLines.push([f.name, d]);
+      days += d;
+    });
+    var scenDays = 4 * scen;
+    if (scen) buildLines.unshift(['Scenario writing and character design (' + scen + ' × 4 d)', scenDays]);
+    days += scenDays;
+    var own = (document.querySelector('input[name=own]:checked') || {}).value || 'managed';
+    var handover = own === 'handover';
+    if (handover && days > 0) {
+      buildLines.push(['Client account setup, repositories, source files, setup guide and training', 2]);
+      days += 2;
+    }
+    var qaDays = days * rate('qa') / 100;
+    if (qaDays) buildLines.push(['QA, accessibility and project management', qaDays]);
+    days += qaDays;
+    // On the client's keys, build-time AI usage bills to their accounts, not ours.
+    var buildPass = ai && !handover ? rate('buildPass') : 0;
+    var build0 = days * rate('dayRate') + buildPass;
+
+    // ---- Usage (only AI features cost per use)
+    var learners = Math.max(0, num('learners'));
+    var roundsYr = learners * num('rounds') * Math.min(12, Math.max(1, num('months')));
+    var mins = num('minutes');
+    var elevenShare = on.avatar ? rate('elevenShare') / 100 : 1;
+    var anamCost = on.avatar ? roundsYr * mins * (1 - elevenShare) * rate('anamMin') : 0;
+    var elevenCost = on.voice || (on.avatar && elevenShare > 0) ? roundsYr * mins * (on.avatar ? elevenShare : 1) * rate('elevenMin') : 0;
+    if (!on.voice && !on.avatar) elevenCost = 0;
+    var claudeCost = on.coach ? roundsYr * rate('claudeRound') : 0;
+    var clients = Math.max(1, rate('clients'));
+    var planShare = (on.avatar ? rate('anamPlan') / clients : 0) + ((on.voice || on.avatar) ? rate('elevenPlan') * 12 / clients : 0);
+
+    // ---- Ongoing
+    var hosting = delivery === 'hosted' ? rate('vercel') * 12 : delivery === 'scormai' ? rate('proxy') * 12 : 0;
+    var anaSel = $('analytics').value;
+    var analytics = anaSel === 'basic' ? rate('anaBasic') * 12 : anaSel === 'lrs' ? rate('anaLrs') * 12 : 0;
+    var maintSel = $('maint').value;
+    var maint = MAINT_HOURS[maintSel] * rate('hourRate') * 12;
+    var mk = rate('markup');
+
+    var lines = [
+      { name: 'Maintenance', sub: maintSel === 'none' ? 'Not included' : MAINT_HOURS[maintSel] + ' hrs a month, ' + maintSel, cost: maint, price: maint },
+      { name: 'Hosting', sub: delivery === 'hosted' ? 'Web app, domain, SSL, logs (Vercel)' : delivery === 'scormai' ? 'AI service the SCORM package calls' : 'Not needed: runs in their LMS', cost: hosting, price: hosting * mk },
+      { name: 'Live character credits', sub: on.avatar ? 'Anam, ' + Math.round(roundsYr * mins * (1 - elevenShare)).toLocaleString() + ' min a year' : 'Not in scope', cost: anamCost, price: anamCost * mk },
+      { name: 'Voice credits', sub: (on.voice || on.avatar) ? 'ElevenLabs, chat mode and fallback' : 'Not in scope', cost: elevenCost, price: elevenCost * mk },
+      { name: 'AI coaching credits', sub: on.coach ? 'Claude, ' + Math.round(roundsYr).toLocaleString() + ' scored rounds a year' : 'Not in scope', cost: claudeCost, price: claudeCost * mk },
+      { name: 'Vendor platform share', sub: planShare ? 'Share of Anam and ElevenLabs plans across ' + clients + ' clients' : 'None', cost: planShare, price: planShare * mk },
+      { name: 'Analytics', sub: anaSel === 'none' ? 'LMS reporting only' : anaSel === 'basic' ? 'Usage and completion dashboard' : 'Learning record store (xAPI)', cost: analytics, price: analytics * mk },
+    ];
+    // Client's keys: the client pays vendors directly from day one; we keep only support.
+    var vendorRun = lines.filter(function (l) { return l.name !== 'Maintenance'; });
+    var launchFee = 0, direct = [];
+    if (handover) {
+      direct = [
+        ['Hosting', delivery === 'hosted' ? 'Vercel Pro or similar' : delivery === 'scormai' ? 'Small server for the AI service' : '', hosting / 12],
+        ['Anam', on.avatar ? 'Plan plus minutes' : '', on.avatar ? (rate('anamPlan') + anamCost) / 12 : 0],
+        ['ElevenLabs', (on.voice || on.avatar) ? 'Plan plus minutes' : '', (on.voice || on.avatar) ? rate('elevenPlan') + elevenCost / 12 : 0],
+        ['Anthropic (Claude)', on.coach ? 'Pay as you go' : '', claudeCost / 12],
+        ['Analytics', anaSel === 'none' ? '' : 'Dashboard or LRS', analytics / 12],
+      ].filter(function (d) { return d[2] > 0; });
+      lines = lines.filter(function (l) { return l.name === 'Maintenance'; });
+      if (lines[0]) lines[0].name = 'Support retainer';
+    }
+    var build = roundTo(build0 + launchFee, 500);
+    var directMonth = direct.reduce(function (a, d) { return a + d[2]; }, 0);
+    var costYr = lines.reduce(function (a, l) { return a + l.cost; }, 0);
+    var annual = roundTo(lines.reduce(function (a, l) { return a + l.price; }, 0), 50);
+    var monthlyBilling = $('billing').value === 'monthly';
+    var month = annual / 12 * (monthlyBilling ? 1.1 : 1);
+    var shownAnnual = monthlyBilling ? month * 12 : annual;
+
+    // ---- Sidebar
+    $('qBuild').textContent = days === 0 ? '$0' : usd(build);
+    $('qBuildNote').textContent = days === 0 ? 'Choose what is in scope in step 2' : Math.round(days * 10) / 10 + ' days at ' + usd(rate('dayRate')) + '/day' + (buildPass ? ', plus build-time AI costs' : '');
+    $('qRun').textContent = annual > 0 ? usd(shownAnnual) + ' / yr' : 'None';
+    $('qRunNote').textContent = handover
+      ? (annual > 0 ? 'Support only. ' : 'No fee to us. ') + (directMonth ? 'Client pays vendors directly, about ' + usd(directMonth) + '/mo' : 'No vendor costs')
+      : annual > 0 ? (monthlyBilling ? 'Billed monthly' : 'Billed annually, up front') : 'Straight SCORM with no AI and no maintenance has no ongoing fee';
+    $('maintLabel').textContent = handover ? 'Support after handover' : 'Maintenance plan';
+    $('qMonth').textContent = annual > 0 ? usd(month) : '$0';
+    $('qLearner').textContent = annual > 0 && learners ? usd(shownAnnual / learners) : '$0';
+    $('side').innerHTML = lines.filter(function (l) { return l.price > 0; }).map(function (l) { return '<tr><td>' + l.name + '</td><td class="n">' + usd(l.price) + '</td></tr>'; }).join('') || '<tr><td class="empty">Nothing ongoing</td></tr>';
+
+    // Usage step hint
+    $('usage').style.opacity = ai ? 1 : 0.45;
+    $('usageHint').textContent = ai ? 'Only AI features cost money per use. These numbers drive the AI credits on the ongoing fee.' : 'No AI features are in scope, so usage does not change the price. Skip ahead.';
+
+    // ---- Detail table and quote text
+    var internal = $('internal').checked;
+    var head = '<tr><th>Item</th>' + (internal ? '<th class="n">Our cost</th>' : '') + '<th class="n">Client price</th></tr>';
+    var bRows = buildLines.map(function (b) { return '<tr><td>' + b[0] + '</td>' + (internal ? '<td class="n">' + (Math.round(b[1] * 10) / 10) + ' d</td>' : '') + '<td class="n">' + usd(b[1] * rate('dayRate')) + '</td></tr>'; }).join('');
+    if (buildPass) bRows += '<tr><td>Build-time AI and asset generation</td>' + (internal ? '<td class="n">' + usd(buildPass) + '</td>' : '') + '<td class="n">' + usd(buildPass) + '</td></tr>';
+    if (handover && ai) bRows += '<tr><td>Build-time AI usage<small>Billed to the client\'s own accounts, about ' + usd(rate('buildPass')) + '</small></td>' + (internal ? '<td class="n">$0</td>' : '') + '<td class="n">$0</td></tr>';
+    var oRows = lines.filter(function (l) { return l.price > 0; }).map(function (l) {
+      return '<tr><td>' + l.name + '<small>' + l.sub + '</small></td>' + (internal ? '<td class="n">' + usd(l.cost) + '</td>' : '') + '<td class="n">' + usd(l.price) + '</td></tr>';
+    }).join('');
+    var margin = annual - costYr;
+    $('detail').innerHTML = '<thead>' + head + '</thead><tbody>' +
+      '<tr><td colspan="' + (internal ? 3 : 2) + '" class="mono" style="padding-top:14px">One-time build</td></tr>' + bRows +
+      '<tr class="sum"><td>Build fee (rounded)</td>' + (internal ? '<td></td>' : '') + '<td class="n">' + usd(build) + '</td></tr>' +
+      '<tr><td colspan="' + (internal ? 3 : 2) + '" class="mono" style="padding-top:18px">Ongoing, per year</td></tr>' + (oRows || '<tr><td class="empty">Nothing ongoing</td></tr>') +
+      '<tr class="sum"><td>Ongoing fee' + (monthlyBilling ? ' (monthly billing)' : '') + '</td>' + (internal ? '<td class="n">' + usd(costYr) + '</td>' : '') + '<td class="n">' + usd(shownAnnual) + '</td></tr>' +
+      (direct.length ? '<tr><td colspan="' + (internal ? 3 : 2) + '" class="mono" style="padding-top:18px">Client pays vendors directly (estimate, per month)</td></tr>' +
+        direct.map(function (d) { return '<tr><td>' + d[0] + '<small>' + d[1] + '</small></td>' + (internal ? '<td></td>' : '') + '<td class="n">' + usd(d[2]) + '</td></tr>'; }).join('') : '') +
+      (internal ? '<tr><td colspan="3" class="internal" style="padding-top:12px">Ongoing margin ' + usd(margin) + ' a year (' + (annual ? Math.round(margin / annual * 100) : 0) + '%). Maintenance is priced at cost of our time; vendor lines carry the ' + mk + '× markup.</td></tr>' : '') +
+      '</tbody>';
+
+    var dl = (delivery ? null : 'Not chosen yet') || { scorm: 'SCORM package for your LMS', scormai: 'SCORM package for your LMS, connected to Matchlight AI services', hosted: 'Hosted by Matchlight' }[delivery];
+    var t = [];
+    t.push('Quote: ' + ($('project').value || 'Simulation') + ' for ' + ($('client').value || 'Client'));
+    t.push('Delivery: ' + (handover && delivery === 'hosted' ? 'Web app on your own hosting account' : dl));
+    t.push('');
+    t.push('ONE-TIME BUILD: ' + usd(build));
+    t.push('Includes ' + (scen || 'no') + ' scenario' + (scen === 1 ? '' : 's') + ': ' + FEATURES.filter(function (f) { return on[f.id]; }).map(function (f) { return f.name; }).join('; ') + '.');
+    if (handover) {
+      t.push('');
+      t.push('ACCOUNTS: before the build starts, you provide API keys for ' + [on.avatar ? 'Anam' : '', (on.voice || on.avatar) ? 'ElevenLabs' : '', on.coach ? 'Anthropic' : '', delivery === 'hosted' || delivery === 'scormai' ? 'your hosting' : ''].filter(Boolean).join(', ') + '. All usage, including testing during the build (about ' + usd(rate('buildPass')) + '), bills to your accounts.');
+      t.push('');
+      t.push('OWNERSHIP: handed over at the end of the build. You receive:');
+      ['Git repositories with full source code', 'Design files, character and media assets', delivery === 'hosted' ? 'Deployment setup for your hosting' : 'SCORM package and source to rebuild it', 'Setup guide covering your accounts, API keys and how to rotate them', 'A handover and training session with your team'].forEach(function (x) { t.push('  - ' + x); });
+      if (direct.length) {
+        t.push('Your direct vendor costs after launch, about ' + usd(directMonth) + ' per month at this usage:');
+        direct.forEach(function (d) { t.push('  ' + d[0] + ': ' + usd(d[2]) + '/mo'); });
+      }
+    }
+    t.push('');
+    if (annual > 0) {
+      t.push((handover ? 'SUPPORT RETAINER: ' : 'ONGOING: ') + usd(shownAnnual) + ' per year' + (monthlyBilling ? ' (' + usd(month) + ' per month)' : ', billed annually') + (learners ? ', for up to ' + learners + ' learners' : ''));
+      lines.filter(function (l) { return l.price > 0; }).forEach(function (l) { t.push('  ' + l.name + ': ' + usd(l.price) + ' (' + l.sub + ')'); });
+      if (ai && !handover) t.push('Includes up to ' + num('rounds') + ' AI practice rounds per learner per month. Additional rounds ' + usd2((anamCost + elevenCost + claudeCost) / Math.max(1, roundsYr) * mk) + ' each.');
+    } else {
+      t.push(handover ? 'ONGOING TO MATCHLIGHT: none. Optional support available.' : 'ONGOING: none. The package runs in your LMS with no AI services. Optional maintenance available.');
+    }
+    $('text').value = t.join('\n');
+    publish({
+      client: $('client').value, project: $('project').value, delivery: dl,
+      build: days === 0 ? 0 : build, scope: FEATURES.filter(function (f) { return on[f.id]; }).map(function (f) { return f.name; }), scenarios: scen,
+      ongoing: shownAnnual, month: month, monthly: monthlyBilling, handover: handover, learners: learners,
+      lines: lines.filter(function (l) { return l.price > 0; }).map(function (l) { return [l.name, l.sub, l.price]; }),
+      direct: direct.map(function (d) { return [d[0], d[2]]; }), directMonth: directMonth,
+    });
+
+    // save
+    try {
+      var s = { delivery: delivery, own: own };
+      ['client', 'project', 'scenarios', 'learners', 'rounds', 'minutes', 'months', 'maint', 'analytics', 'billing'].forEach(function (k) { s[k] = $(k).value; });
+      FEATURES.forEach(function (f) { s['ft_' + f.id] = $('ft_' + f.id).checked; });
+      RATES.forEach(function (r) { s['r_' + r[0]] = $('r_' + r[0]).value; });
+      localStorage.setItem(KEY, JSON.stringify(s));
+    } catch (e) {}
+  }
+
+  // Straight SCORM: switch off AI features and maintenance defaults once.
+  document.querySelectorAll('input[name=delivery]').forEach(function (r) {
+    // 'input' on the radio runs before the form's own listener, so the defaults apply first.
+    r.addEventListener('input', function () {
+      if (r.value === 'scorm' && r.checked) {
+        ['avatar', 'voice', 'coach'].forEach(function (id) { $('ft_' + id).checked = false; });
+        $('maint').value = 'none'; $('analytics').value = 'none';
+      }
+      if (r.value === 'hosted' && r.checked) $('ft_scorm').checked = false;
+      calc();
+    });
+  });
+  $('f').addEventListener('input', calc);
+  $('f').addEventListener('change', calc);
+  $('copy').addEventListener('click', function () {
+    var ta = $('text');
+    var done = function () { $('copied').textContent = 'Copied'; setTimeout(function () { $('copied').textContent = ''; }, 2000); };
+    try {
+      navigator.clipboard.writeText(ta.value).then(done, function () { ta.focus(); ta.select(); $('copied').textContent = 'Selected. Press Cmd+C'; });
+    } catch (e) { ta.focus(); ta.select(); $('copied').textContent = 'Selected. Press Cmd+C'; }
+  });
+
+  // ---- Client view: a separate page that shows the quote without internal numbers.
+  var channel = 'BroadcastChannel' in window ? new BroadcastChannel('ml-quote') : null;
+  var meetPanel = null, lastView = null;
+  function publish(view) {
+    lastView = view;
+    try { channel && channel.postMessage(view); } catch (e) {}
+    if (meetPanel) meetPanel.notifyMainStage(JSON.stringify(view)).catch(function () {});
+  }
+
+  // ---- Autofill from notes
+  var code = '';
+  try { code = localStorage.getItem('ml-quote-code') || ''; } catch (e) {}
+  function api(body) {
+    return fetch('/api/quote-intake', { method: 'POST', headers: { 'content-type': 'application/json', 'x-quote-code': code }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { j._status = r.status; return j; }); });
+  }
+  var esc = function (x) { return String(x).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+  $('fill').addEventListener('click', function () {
+    var text = $('notes').value.trim();
+    if (text.length < 20) { $('autoStatus').textContent = 'Paste a bit more first.'; return; }
+    $('autoStatus').textContent = 'Reading the notes…'; $('fill').disabled = true;
+    api({ text: text }).then(function (r) {
+      $('fill').disabled = false;
+      if (r.error) {
+        $('autoStatus').textContent = r.error === 'not_configured' ? 'Autofill needs the Claude API key in Vercel (ANTHROPIC_API_KEY).' : r.error === 'unauthorized' ? 'Access code is wrong. Reload and try again.' : 'Could not read the notes. Try again.';
+        return;
+      }
+      applyState(fromFields(r.fields), true); calc();
+      var ev = (r.evidence || []).map(function (e) { return '<li><b>' + esc(e.field) + '</b>: <q>' + esc(e.quote) + '</q></li>'; }).join('');
+      var oq = (r.open_questions || []).map(function (q) { return '<li>' + esc(q) + '</li>'; }).join('');
+      $('found').innerHTML = (ev ? '<div><span class="mono">Filled from the notes</span><ul>' + ev + '</ul></div>' : '') + (oq ? '<div><span class="mono">Still to ask</span><ul>' + oq + '</ul></div>' : '');
+      $('found').hidden = !(ev || oq);
+      $('autoStatus').textContent = 'Filled. Check each step.';
+    }).catch(function () { $('fill').disabled = false; $('autoStatus').textContent = 'Network problem. Try again.'; });
+  });
+  $('share').addEventListener('click', function () {
+    var enc = btoa(unescape(encodeURIComponent(JSON.stringify(currentFields())))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    var url = location.origin + '/quote#prefill=' + enc;
+    var done = function (m) { $('autoStatus').textContent = m; };
+    try { navigator.clipboard.writeText(url).then(function () { done('Prefill link copied.'); }, function () { $('notes').value = url; done('Link is in the box above.'); }); } catch (e) { $('notes').value = url; done('Link is in the box above.'); }
+  });
+  $('present').addEventListener('click', function () {
+    if (meetPanel) {
+      meetPanel.startActivity({ mainStageUrl: location.origin + '/quote/stage.html' + location.search })
+        .then(function () { setTimeout(function () { publish(lastView); }, 1500); $('autoStatus').textContent = 'Showing the client view on the main stage.'; })
+        .catch(function (e) { $('autoStatus').textContent = 'Meet would not start the activity: ' + (e && e.errorType || e); });
+    } else {
+      window.open('/quote/stage.html', 'ml-quote-stage');
+      setTimeout(function () { publish(lastView); }, 1200);
+      $('autoStatus').textContent = 'Client view opened. Share that window on the call.';
+    }
+  });
+  if (channel) channel.onmessage = function (e) { if (e.data === 'ready') publish(lastView); };
+
+  // Other tools can push fields in: window.postMessage({ type: 'matchlight-quote-prefill', fields }, '*')
+  window.addEventListener('message', function (e) {
+    if (e.data && e.data.type === 'matchlight-quote-prefill' && e.data.fields) { applyState(fromFields(e.data.fields), true); calc(); }
+  });
+
+  // ---- Google Meet side panel (?meet=1&project=<cloud project number>)
+  var qs = new URLSearchParams(location.search);
+  if (qs.get('meet') === '1') {
+    document.body.classList.add('meet');
+    $('present').textContent = 'Present to client';
+    import('https://cdn.jsdelivr.net/npm/@googleworkspace/meet-addons@1.2.0/meet.addons.mjs').then(function (m) {
+      return m.meet.addon.createAddonSession({ cloudProjectNumber: qs.get('project') || '' });
+    }).then(function (session) { return session.createSidePanelClient(); })
+      .then(function (client) {
+        meetPanel = client;
+        client.on('frameToFrameMessage', function (m) { if (m.payload === 'ready') publish(lastView); });
+        $('autoStatus').textContent = 'Connected to Google Meet.';
+      })
+      .catch(function (e) { $('autoStatus').textContent = 'Not connected to Meet (' + (e && e.errorType || 'outside a meeting') + ').'; });
+  }
+
+  // ---- Access code
+  fetch('/api/quote-intake').then(function (r) { return /json/.test(r.headers.get('content-type') || '') ? r.json() : {}; }).then(function (g) {
+    if (g.gate !== true) return;
+    var tryCode = function (c) { code = c; return api({ check: true }).then(function (r) { return !r.error; }); };
+    tryCode(code).then(function (ok) {
+      if (ok) return;
+      $('gate').hidden = false; $('code').focus();
+      $('gateForm').addEventListener('submit', function (e) {
+        e.preventDefault();
+        tryCode($('code').value).then(function (ok2) {
+          if (!ok2) { $('gateErr').textContent = 'That code did not work.'; return; }
+          try { localStorage.setItem('ml-quote-code', code); } catch (err) {}
+          $('gate').hidden = true;
+        });
+      });
+    });
+  }).catch(function () {});
+
+  renderSteps();
+  calc();
+})();
+</script>
+</body>
+</html>

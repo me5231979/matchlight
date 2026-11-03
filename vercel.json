@@ -20,9 +20,30 @@
           "value": "public, max-age=604800"
         }
       ]
+    },
+    {
+      "source": "/quote(.*)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors 'self' https://meet.google.com"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
     }
   ],
   "rewrites": [
+    {
+      "source": "/quote",
+      "destination": "/quote/index.html"
+    },
     {
       "source": "/media/wallpaper.png",
       "destination": "https://d8j0ntlcm91z4.cloudfront.net/user_3CCurpI0FW75YAnAl4Hbz3vPdBv/hf_20261103_063050_1ab88a4e-a491-44f5-88a2-4b8f5b39730e.png"
