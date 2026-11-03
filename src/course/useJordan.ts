@@ -4,6 +4,17 @@ import { AGENT_ID } from './data';
 
 export type Line = { role: 'manager' | 'jordan'; text: string };
 export type CallStatus = 'idle' | 'connecting' | 'live' | 'ended' | 'error';
+export type Mood = 'neutral' | 'hurt' | 'defensive' | 'warm';
+
+/** Jordan's voice cues ([sad], [sigh], [frustrated]...) tell us how they feel. */
+export function moodOf(raw: string, fallback: Mood): Mood {
+  const tags = (raw.match(/\[([^\]]+)\]/g) || []).join(' ').toLowerCase();
+  if (!tags) return fallback;
+  if (/sad|sigh|tear|cry|quiet|hesitant|tired|exhal|voice breaks|soft/.test(tags)) return 'hurt';
+  if (/frustrat|annoy|defens|angry|sharp|irritat|curt|scoff/.test(tags)) return 'defensive';
+  if (/happy|relie|laugh|warm|smil|grateful|chuckl|light/.test(tags)) return 'warm';
+  return fallback;
+}
 type Session = Awaited<ReturnType<typeof Conversation.startSession>>;
 
 export type StartOptions = {
@@ -28,6 +39,7 @@ export function useJordan() {
   const [speaking, setSpeaking] = useState(false);
   const [error, setError] = useState('');
   const [elapsed, setElapsed] = useState(0);
+  const [mood, setMood] = useState<Mood>('neutral');
   const session = useRef<Session | null>(null);
   const opts = useRef<StartOptions | null>(null);
   const timer = useRef<number>();
@@ -69,13 +81,22 @@ export function useJordan() {
       setLines([]);
       setError('');
       setElapsed(0);
+      setMood('neutral');
       setStatus('connecting');
       if (import.meta.env.DEV && new URLSearchParams(location.search).has('mock')) {
         // Local UI testing only: a scripted Jordan, no network.
-        const replies = ['Yeah. Since Priya left I have kind of been doing two jobs.', 'And my dad had a fall. I have been driving out there three nights a week.', 'Okay. Wednesday works. Thanks for asking.'];
+        const replies = ['[sigh] Yeah. Since Priya left I have kind of been doing two jobs.', '[sad] And my dad had a fall. I have been driving out there three nights a week.', '[relieved] Okay. Wednesday works. Thanks for asking.'];
         let n = 0;
         session.current = {
-          sendUserMessage: () => window.setTimeout(() => push({ role: 'jordan', text: replies[n++ % replies.length] }), 400),
+          sendUserMessage: () =>
+            window.setTimeout(() => {
+              const r = replies[n++ % replies.length];
+              setMood((m) => moodOf(r, m));
+              setSpeaking(true);
+              window.setTimeout(() => setSpeaking(false), 2200);
+              push({ role: 'jordan', text: stripAudioTags(r).trim() });
+            }, 400),
+          setMicMuted: () => {},
           endSession: async () => {},
           getOutputVolume: () => 0,
           getInputVolume: () => 0,
@@ -103,6 +124,7 @@ export function useJordan() {
             const text = stripAudioTags(message).replace(/\s{2,}/g, ' ').trim();
             // Typed mode: we already added the manager's own message on send.
             if (o.typed && role !== 'agent') return;
+            if (role === 'agent') setMood((m) => moodOf(message, m));
             if (text) push({ role: role === 'agent' ? 'jordan' : 'manager', text });
           },
           onModeChange: ({ mode }) => setSpeaking(mode === 'speaking'),
@@ -145,6 +167,14 @@ export function useJordan() {
     [push],
   );
 
+  const mute = useCallback((on: boolean) => {
+    try {
+      session.current?.setMicMuted(on);
+    } catch {
+      /* not supported in this mode */
+    }
+  }, []);
+
   const volume = useCallback(() => {
     const s = session.current;
     if (!s) return 0;
@@ -162,7 +192,7 @@ export function useJordan() {
     [stop],
   );
 
-  return { status, lines, speaking, error, elapsed, start, stop, send, volume };
+  return { status, lines, speaking, error, elapsed, mood, start, stop, send, volume, mute };
 }
 
 export type ScoreResult = {

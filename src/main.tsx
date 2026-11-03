@@ -3,10 +3,11 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import { LegalNotice, Privacy } from './pages/Legal';
 const CourseApp = lazy(() => import('./course/CourseApp'));
+const SimApp = lazy(() => import('./sim/SimApp'));
 import './index.css';
 
 const path = window.location.pathname.replace(/\/+$/, '');
-const Page = path === '/privacy' ? Privacy : path === '/legal' ? LegalNotice : path === '/demo' ? CourseApp : App;
+const Page = path === '/privacy' ? Privacy : path === '/legal' ? LegalNotice : path === '/demo' ? (/[?&](practice|rep)=1/.test(window.location.search) ? CourseApp : SimApp) : App;
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
