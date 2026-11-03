@@ -5,7 +5,7 @@ import { CoachNote, ScoreBars, TaggedTranscript, scoringMessage } from '../cours
 import { DEFAULT_PERSONA } from '../course/data';
 import { scoreTranscript, useJordan, type Line, type ScoreResult } from '../course/useJordan';
 import Desk, { MEDIA } from './Desk';
-import VideoCall, { CLIPS, Lobby, useCamera } from './VideoCall';
+import VideoCall, { Lobby, useCamera } from './VideoCall';
 import { useAvatar } from './useAvatar';
 import { BEFORE, CLUES, LATER, type Tier } from './world';
 import { TIER_COPY, decideTier, readSignals } from './outcome';
@@ -46,17 +46,6 @@ export default function SimApp() {
       /* private mode: fine */
     }
   }, [saved]);
-  useEffect(() => {
-    // Warm the video loops while the learner reads the desk.
-    if (stage !== 'desk') return;
-    Object.values(CLIPS).forEach((src) => {
-      const l = document.createElement('link');
-      l.rel = 'preload';
-      l.as = 'video';
-      l.href = src;
-      document.head.appendChild(l);
-    });
-  }, [stage]);
 
   const sawClue = useCallback((id: string) => setClues((c) => (c.includes(id) ? c : [...c, id])), []);
 

@@ -79,7 +79,7 @@ Before sharing publicly: in the ElevenLabs dashboard, open the Jordan agent's Se
 The call uses [Anam](https://lab.anam.ai) to render Jordan's face from the ElevenLabs voice in real time.
 ElevenLabs stays the voice and conversation; Anam only animates the face (audio passthrough).
 
-1. In Anam Lab, create a custom avatar from `https://matchlight-two.vercel.app/media/jordan-portrait.png`.
+1. In Anam Lab, pick the avatar who plays Jordan (`public/jordan/portrait.webp` is a still of them, used on the desk and pre-join screen).
 2. In Vercel, add `ANAM_API_KEY` and `ANAM_AVATAR_ID`, then redeploy.
 
-Without them (or if Anam fails to connect within 12 seconds) the call falls back to the recorded video loops.
+Without them (or if Anam fails to connect within 12 seconds) the call shows Jordan's still frame with the voice on the speakers.

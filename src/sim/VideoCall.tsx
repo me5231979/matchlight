@@ -4,14 +4,7 @@ import type { CallStatus, Line, Mood } from '../course/useJordan';
 import { MEDIA } from './Desk';
 import { AVATAR_VIDEO_ID } from './useAvatar';
 
-export const CLIPS = {
-  idle: '/media/jordan-idle.mp4',
-  neutral: '/media/jordan-talk.mp4',
-  hurt: '/media/jordan-hurt.mp4',
-  defensive: '/media/jordan-defensive.mp4',
-  warm: '/media/jordan-warm.mp4',
-} as const;
-type Clip = keyof typeof CLIPS;
+
 
 const fmt = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
@@ -61,34 +54,11 @@ function SelfView({ stream, on, className = '' }: { stream: MediaStream | null; 
   );
 }
 
-/** Jordan's video. Each mood is a short loop; we cross-fade between them. */
-function JordanVideo({ clip, speaking, avatar }: { clip: Clip; speaking: boolean; avatar: 'off' | 'starting' | 'live' }) {
-  const refs = useRef<Record<string, HTMLVideoElement | null>>({});
-  useEffect(() => {
-    const el = refs.current[clip];
-    if (el) {
-      el.currentTime = 0;
-      void el.play().catch(() => {});
-    }
-  }, [clip]);
+/** Jordan's video: the live lip-synced avatar, over a still frame while it connects. */
+function JordanVideo({ speaking, avatar }: { speaking: boolean; avatar: 'off' | 'starting' | 'live' }) {
   return (
     <div className="absolute inset-0 overflow-hidden rounded-2xl bg-[#111]">
-      <img src={MEDIA.portrait} alt="" className="absolute inset-0 h-full w-full object-cover" />
-      {(Object.keys(CLIPS) as Clip[]).map((k) => (
-        <video
-          key={k}
-          ref={(el) => (refs.current[k] = el)}
-          src={CLIPS[k]}
-          muted
-          loop
-          playsInline
-          autoPlay
-          preload="auto"
-          aria-hidden
-          className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500"
-          style={{ opacity: k === clip ? 1 : 0 }}
-        />
-      ))}
+      <img src={MEDIA.portrait} alt="" className={`absolute inset-0 h-full w-full object-cover transition-transform duration-[2000ms] ${speaking && avatar !== 'live' ? 'scale-[1.015]' : ''}`} />
       {/* Live, lip-synced Jordan. Carries Jordan's voice, so it is not muted. */}
       <video
         id={AVATAR_VIDEO_ID}
@@ -109,7 +79,7 @@ type CallProps = {
   status: CallStatus;
   lines: Line[];
   speaking: boolean;
-  mood: Mood;
+  mood?: Mood;
   elapsed: number;
   limit: number;
   typed: boolean;
@@ -173,7 +143,7 @@ export function Lobby({ typed, onJoin, onBack, stream, denied, camOn, setCamOn }
   );
 }
 
-export default function VideoCall({ avatar, status, lines, speaking, mood, elapsed, limit, typed, error, notes, onSend, onLeave, onMute, stream, camOn, setCamOn }: CallProps) {
+export default function VideoCall({ avatar, status, lines, speaking, elapsed, limit, typed, error, notes, onSend, onLeave, onMute, stream, camOn, setCamOn }: CallProps) {
   const [muted, setMuted] = useState(false);
   const [cc, setCc] = useState(true);
   const [panel, setPanel] = useState<'none' | 'chat' | 'notes'>(typed ? 'chat' : 'none');
@@ -192,7 +162,6 @@ export default function VideoCall({ avatar, status, lines, speaking, mood, elaps
   }, [lines.length]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const talking = speaking || typedTalk;
-  const clip: Clip = talking ? mood : 'idle';
   const caption = talking ? lastJordan?.text : lines.at(-1)?.role === 'manager' && !typed ? lines.at(-1)?.text : undefined;
   const captionWho = talking ? 'Jordan Ellis' : 'You';
 
@@ -214,7 +183,7 @@ export default function VideoCall({ avatar, status, lines, speaking, mood, elaps
         {/* stage */}
         <div className="relative min-w-0 flex-1">
           <div className="absolute inset-0">
-            <JordanVideo clip={clip} speaking={talking} avatar={avatar} />
+            <JordanVideo speaking={talking} avatar={avatar} />
             <span className="absolute bottom-3 left-3 rounded bg-black/50 px-2 py-0.5 text-[13px]">Jordan Ellis</span>
             {(status === 'connecting' || status === 'idle') && <div className="absolute inset-0 grid place-items-center rounded-2xl bg-black/40 text-[15px] text-white/80">Connecting audio…</div>}
             {limit - elapsed <= 60 && live && <div className="toast-in absolute left-1/2 top-4 -translate-x-1/2 rounded-full bg-black/70 px-4 py-2 text-[13px]">Your next meeting starts in {Math.max(0, limit - elapsed)} seconds</div>}

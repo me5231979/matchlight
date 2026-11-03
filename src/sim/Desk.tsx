@@ -3,7 +3,7 @@ import { CalendarDays, FileText, Mail as MailIcon, MessageCircle, StickyNote, Vi
 import type { App, CalEvent, World } from './world';
 
 export const MEDIA = {
-  portrait: '/media/jordan-portrait.png',
+  portrait: '/jordan/portrait.webp',
   wallpaper: '/media/wallpaper.png',
 };
 

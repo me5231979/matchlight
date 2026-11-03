@@ -24,32 +24,8 @@
   ],
   "rewrites": [
     {
-      "source": "/media/jordan-portrait.png",
-      "destination": "https://d8j0ntlcm91z4.cloudfront.net/user_3CCurpI0FW75YAnAl4Hbz3vPdBv/hf_20261103_062703_b0e3cf3c-07c8-47c0-b850-73b891ad993b.png"
-    },
-    {
       "source": "/media/wallpaper.png",
       "destination": "https://d8j0ntlcm91z4.cloudfront.net/user_3CCurpI0FW75YAnAl4Hbz3vPdBv/hf_20261103_063050_1ab88a4e-a491-44f5-88a2-4b8f5b39730e.png"
-    },
-    {
-      "source": "/media/jordan-idle.mp4",
-      "destination": "https://d8j0ntlcm91z4.cloudfront.net/user_3CCurpI0FW75YAnAl4Hbz3vPdBv/hf_20261103_062755_8935fe5b-b01b-4a98-9e24-9cf61b2a2f28.mp4"
-    },
-    {
-      "source": "/media/jordan-talk.mp4",
-      "destination": "https://d8j0ntlcm91z4.cloudfront.net/user_3CCurpI0FW75YAnAl4Hbz3vPdBv/hf_20261103_062748_48be2fca-26f1-4d1f-89a3-c04e62099158.mp4"
-    },
-    {
-      "source": "/media/jordan-hurt.mp4",
-      "destination": "https://d8j0ntlcm91z4.cloudfront.net/user_3CCurpI0FW75YAnAl4Hbz3vPdBv/hf_20261103_062749_7cef047f-ef54-4f20-9b71-2fc6817b920e.mp4"
-    },
-    {
-      "source": "/media/jordan-defensive.mp4",
-      "destination": "https://d8j0ntlcm91z4.cloudfront.net/user_3CCurpI0FW75YAnAl4Hbz3vPdBv/hf_20261103_062749_7d5ca7cd-c558-4b3e-9e94-3b33b9201839.mp4"
-    },
-    {
-      "source": "/media/jordan-warm.mp4",
-      "destination": "https://d8j0ntlcm91z4.cloudfront.net/user_3CCurpI0FW75YAnAl4Hbz3vPdBv/hf_20261103_062748_8036cfb6-b8e8-482f-a6f0-3fb170638e3b.mp4"
     },
     {
       "source": "/privacy",
