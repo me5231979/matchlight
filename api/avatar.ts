@@ -41,6 +41,31 @@ This is a spoken video call. Reply in one to three short sentences, the way a re
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } });
 
+/**
+ * ANAM_AVATAR_ID may hold either an avatar ID or a persona ID (for example a stock
+ * persona like "Mia"). For a persona, look up the avatar (and voice) it uses.
+ */
+let resolved: { avatarId: string; voiceId?: string } | null = null;
+async function resolveAvatar(id: string, apiKey: string): Promise<{ avatarId: string; voiceId?: string }> {
+  if (resolved) return resolved;
+  try {
+    const res = await fetch(`https://api.anam.ai/v1/personas/${id}`, { headers: { authorization: `Bearer ${apiKey}` } });
+    if (res.ok) {
+      const p = (await res.json()) as { avatar?: { id?: string }; avatarId?: string; voice?: { id?: string }; voiceId?: string };
+      const avatarId = p.avatar?.id ?? p.avatarId;
+      if (avatarId) {
+        resolved = { avatarId, voiceId: p.voice?.id ?? p.voiceId };
+        console.log('anam: resolved persona to avatar', avatarId);
+        return resolved;
+      }
+    }
+  } catch (e) {
+    console.error('anam persona lookup failed', e);
+  }
+  resolved = { avatarId: id };
+  return resolved;
+}
+
 function tokenType(token: string): string {
   try {
     const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString('utf8')) as { type?: string };
@@ -58,10 +83,11 @@ export async function POST(request: Request) {
   const avatarId = process.env.ANAM_AVATAR_ID;
   if (!apiKey || !avatarId) return json({ error: 'not_configured' }, 503);
 
+  const face = await resolveAvatar(avatarId, apiKey);
   const personaConfig: Record<string, unknown> = {
     name: 'Jordan Ellis',
-    avatarId,
-    voiceId: process.env.ANAM_VOICE_ID || DEFAULT_VOICE_ID,
+    avatarId: face.avatarId,
+    voiceId: process.env.ANAM_VOICE_ID || face.voiceId || DEFAULT_VOICE_ID,
     systemPrompt: SYSTEM_PROMPT,
     maxSessionLengthSeconds: 660,
   };
