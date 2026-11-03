@@ -64,7 +64,7 @@ export const BEFORE: World = {
     },
     {
       id: 'pulse',
-      from: 'People Ops',
+      from: 'Regal People Ops',
       subject: 'Your team pulse: October',
       when: 'Oct 24',
       clue: 'pulse',
@@ -76,7 +76,7 @@ export const BEFORE: World = {
     },
     {
       id: 'backfill',
-      from: 'People Ops',
+      from: 'Regal People Ops',
       subject: 'Backfill update: Project Coordinator (P. Nair)',
       when: 'Oct 20',
       clue: 'backfill',
@@ -87,7 +87,7 @@ export const BEFORE: World = {
     },
     {
       id: 'it',
-      from: 'IT Service Desk',
+      from: 'Regal IT',
       subject: 'Your password expires in 5 days',
       when: 'Oct 31',
       body: ['Update your password before it expires to avoid losing access.'],
@@ -202,7 +202,7 @@ const later = (tier: Tier): World => {
         },
         {
           id: 'l2',
-          from: 'People Ops',
+          from: 'Regal People Ops',
           subject: 'Approved: interim cover for Mercer and Brightline',
           when: 'Tue 4:15 PM',
           unread: true,
@@ -249,7 +249,7 @@ const later = (tier: Tier): World => {
         },
         {
           id: 'f2',
-          from: 'People Ops',
+          from: 'Regal People Ops',
           subject: 'Absence recorded: Jordan Ellis',
           when: 'Fri 8:02 AM',
           unread: true,
@@ -284,7 +284,7 @@ const later = (tier: Tier): World => {
     mail: [
       {
         id: 'o1',
-        from: 'People Ops',
+        from: 'Regal People Ops',
         subject: 'Resignation: Jordan Ellis',
         when: 'Fri 5:48 PM',
         unread: true,

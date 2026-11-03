@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Captions, Keyboard, Lock, Mic, MicOff, NotebookPen, PhoneOff, Send, Video, VideoOff } from 'lucide-react';
 import type { CallStatus, Line, Mood } from '../course/useJordan';
 import { MEDIA } from './Desk';
+import { RegalMark } from './Regal';
 import { AVATAR_VIDEO_ID } from './useMia';
 
 
@@ -69,7 +70,7 @@ function JordanVideo({ speaking, avatar }: { speaking: boolean; avatar: 'off' | 
         style={{ opacity: avatar === 'live' ? 1 : 0 }}
       />
       {/* the speaking ring sits above the video */}
-      <div className={`pointer-events-none absolute inset-0 rounded-2xl transition-shadow duration-200 ${speaking ? 'shadow-[inset_0_0_0_3px_#8ab4f8]' : ''}`} />
+      <div className={`pointer-events-none absolute inset-0 rounded-2xl transition-shadow duration-200 ${speaking ? 'shadow-[inset_0_0_0_3px_#C8A24A]' : ''}`} />
     </div>
   );
 }
@@ -97,7 +98,7 @@ type LobbyProps = { typed: boolean; onJoin: (typed: boolean) => void; onBack: ()
 
 export function Lobby({ typed, onJoin, onBack, stream, denied, camOn, setCamOn }: LobbyProps) {
   return (
-    <div className="os fixed inset-0 flex flex-col bg-[#202124] text-white">
+    <div className="os absolute inset-0 flex flex-col bg-[#0B1428] text-white">
       <div className="flex h-14 items-center justify-between px-6 text-[14px] text-white/70">
         <button type="button" onClick={onBack} className="hover:text-white">
           ‹ Back to desk
@@ -115,7 +116,7 @@ export function Lobby({ typed, onJoin, onBack, stream, denied, camOn, setCamOn }
               onClick={() => setCamOn(!camOn)}
               aria-pressed={!camOn}
               aria-label={camOn ? 'Turn camera off' : 'Turn camera on'}
-              className={`grid h-12 w-12 place-items-center rounded-full ${camOn && !denied ? 'bg-[#3c4043] hover:bg-[#4a4e51]' : 'bg-[#ea4335]'}`}
+              className={`grid h-12 w-12 place-items-center rounded-full ${camOn && !denied ? 'bg-[#1f2d4d] hover:bg-[#2a3a60]' : 'bg-[#ea4335]'}`}
             >
               {camOn && !denied ? <Video size={20} aria-hidden /> : <VideoOff size={20} aria-hidden />}
             </button>
@@ -123,16 +124,17 @@ export function Lobby({ typed, onJoin, onBack, stream, denied, camOn, setCamOn }
           <p className="mt-3 text-center text-[13px] text-white/50">{denied ? 'Camera is off. That is fine; Jordan cannot see you either way.' : 'Your camera stays on this device. Jordan cannot see it and nothing is recorded.'}</p>
         </div>
         <div className="text-center md:text-left">
-          <h1 className="text-[30px] font-normal tracking-tight">Ready to join?</h1>
+          <RegalMark size={18} />
+          <h1 className="mt-4 text-[30px] font-normal tracking-tight">Ready to join?</h1>
           <div className="mt-4 flex items-center justify-center gap-3 md:justify-start">
             <img src={MEDIA.portrait} alt="" className="h-8 w-8 rounded-full object-cover" />
             <p className="text-[15px] text-white/75">Jordan Ellis is in this call</p>
           </div>
           <div className="mt-8 flex flex-col items-center gap-4 md:items-start">
-            <button type="button" onClick={() => onJoin(false)} className="rounded-full bg-[#8ab4f8] px-8 py-3 text-[15px] font-medium text-[#202124] hover:bg-[#aecbfa]">
+            <button type="button" onClick={() => onJoin(false)} className="rounded-full bg-[#C8A24A] px-8 py-3 text-[15px] font-medium text-[#0B1428] hover:bg-[#d9b968]">
               Join now
             </button>
-            <button type="button" onClick={() => onJoin(true)} className="inline-flex items-center gap-2 text-[14px] text-[#8ab4f8] hover:underline">
+            <button type="button" onClick={() => onJoin(true)} className="inline-flex items-center gap-2 text-[14px] text-[#C8A24A] hover:underline">
               <Keyboard size={15} aria-hidden /> {typed ? 'Join with chat (you chose typing)' : "Can't talk out loud? Join with chat"}
             </button>
           </div>
@@ -165,12 +167,16 @@ export default function VideoCall({ avatar, status, lines, speaking, elapsed, li
   const caption = talking ? lastJordan?.text : lines.at(-1)?.role === 'manager' && !typed ? lines.at(-1)?.text : undefined;
   const captionWho = talking ? 'Jordan Ellis' : 'You';
 
-  const btn = 'grid h-12 w-12 place-items-center rounded-full bg-[#3c4043] text-white hover:bg-[#4a4e51]';
+  const btn = 'grid h-12 w-12 place-items-center rounded-full bg-[#1f2d4d] text-white hover:bg-[#2a3a60]';
   return (
-    <div className="os fixed inset-0 flex flex-col bg-[#202124] text-white">
+    <div className="os absolute inset-0 flex flex-col bg-[#0B1428] text-white">
       {/* top */}
       <div className="flex h-12 shrink-0 items-center justify-between px-5 text-[14px]">
-        <span className="font-medium">1:1 Jordan Ellis</span>
+        <span className="flex items-center gap-3 font-medium">
+          <RegalMark size={16} />
+          <span className="text-white/40">Meet</span>
+          <span className="hidden sm:inline">· 1:1 Jordan Ellis</span>
+        </span>
         <span className="flex items-center gap-3 text-white/70">
           {status === 'connecting' ? 'Connecting…' : <span className="tabular-nums">{fmt(elapsed)}</span>}
           <span className="hidden items-center gap-1.5 sm:flex">
@@ -207,7 +213,7 @@ export default function VideoCall({ avatar, status, lines, speaking, elapsed, li
 
         {/* side panel */}
         {panel !== 'none' && (
-          <aside className="absolute inset-x-3 bottom-20 top-14 z-10 flex flex-col overflow-hidden rounded-2xl bg-white text-[#202124] md:static md:w-[340px]" aria-label={panel === 'chat' ? 'In-call messages' : 'Your notes'}>
+          <aside className="absolute inset-x-3 bottom-20 top-14 z-10 flex flex-col overflow-hidden rounded-2xl bg-white text-[#0B1428] md:static md:w-[340px]" aria-label={panel === 'chat' ? 'In-call messages' : 'Your notes'}>
             <p className="border-b border-black/10 px-5 py-4 text-[16px] font-medium">{panel === 'chat' ? 'In-call messages' : 'Your notes'}</p>
             {panel === 'notes' ? (
               <p className="flex-1 overflow-y-auto whitespace-pre-wrap p-5 text-[14px] leading-relaxed">{notes || 'You did not write any notes.'}</p>
@@ -239,9 +245,9 @@ export default function VideoCall({ avatar, status, lines, speaking, elapsed, li
                       disabled={!live}
                       aria-label="Your reply to Jordan"
                       placeholder="Say it the way you would say it"
-                      className="flex-1 rounded-full bg-[#f1f3f4] px-4 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#1a73e8]"
+                      className="flex-1 rounded-full bg-[#f1f3f4] px-4 py-2.5 text-[14px] focus:outline-none focus:ring-2 focus:ring-[#14213D]"
                     />
-                    <button type="submit" disabled={!live || !draft.trim()} aria-label="Send" className="grid h-10 w-10 place-items-center rounded-full text-[#1a73e8] disabled:opacity-30">
+                    <button type="submit" disabled={!live || !draft.trim()} aria-label="Send" className="grid h-10 w-10 place-items-center rounded-full text-[#14213D] disabled:opacity-30">
                       <Send size={18} aria-hidden />
                     </button>
                   </form>
@@ -271,13 +277,13 @@ export default function VideoCall({ avatar, status, lines, speaking, elapsed, li
         <button type="button" onClick={() => setCamOn(!camOn)} aria-pressed={!camOn} aria-label={camOn ? 'Turn camera off' : 'Turn camera on'} className={camOn ? btn : `${btn} !bg-[#ea4335]`}>
           {camOn ? <Video size={20} aria-hidden /> : <VideoOff size={20} aria-hidden />}
         </button>
-        <button type="button" onClick={() => setCc(!cc)} aria-pressed={cc} aria-label="Captions" className={cc ? `${btn} !bg-[#8ab4f8] !text-[#202124]` : btn}>
+        <button type="button" onClick={() => setCc(!cc)} aria-pressed={cc} aria-label="Captions" className={cc ? `${btn} !bg-[#C8A24A] !text-[#0B1428]` : btn}>
           <Captions size={20} aria-hidden />
         </button>
-        <button type="button" onClick={() => setPanel(panel === 'chat' ? 'none' : 'chat')} aria-pressed={panel === 'chat'} aria-label={typed ? 'Chat' : 'Transcript'} className={panel === 'chat' ? `${btn} !bg-[#8ab4f8] !text-[#202124]` : btn}>
+        <button type="button" onClick={() => setPanel(panel === 'chat' ? 'none' : 'chat')} aria-pressed={panel === 'chat'} aria-label={typed ? 'Chat' : 'Transcript'} className={panel === 'chat' ? `${btn} !bg-[#C8A24A] !text-[#0B1428]` : btn}>
           <Keyboard size={20} aria-hidden />
         </button>
-        <button type="button" onClick={() => setPanel(panel === 'notes' ? 'none' : 'notes')} aria-pressed={panel === 'notes'} aria-label="Your notes" className={panel === 'notes' ? `${btn} !bg-[#8ab4f8] !text-[#202124]` : btn}>
+        <button type="button" onClick={() => setPanel(panel === 'notes' ? 'none' : 'notes')} aria-pressed={panel === 'notes'} aria-label="Your notes" className={panel === 'notes' ? `${btn} !bg-[#C8A24A] !text-[#0B1428]` : btn}>
           <NotebookPen size={20} aria-hidden />
         </button>
         <button type="button" onClick={onLeave} aria-label="Leave call" className="grid h-12 w-16 place-items-center rounded-full bg-[#ea4335] hover:bg-[#d93025]">

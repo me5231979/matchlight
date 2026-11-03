@@ -4,7 +4,8 @@ import { Wordmark } from '../components/Nav';
 import { CoachNote, ScoreBars, TaggedTranscript, scoringMessage } from '../course/Feedback';
 import { DEFAULT_PERSONA } from '../course/data';
 import { scoreTranscript, useJordan, type Line, type ScoreResult } from '../course/useJordan';
-import Desk, { MEDIA } from './Desk';
+import Desk from './Desk';
+import { REGAL, RegalMark, SimFrame } from './Regal';
 import VideoCall, { Lobby, useCamera } from './VideoCall';
 import { FIRST_LINE, useMia } from './useMia';
 import { BEFORE, CLUES, LATER, type Tier } from './world';
@@ -118,6 +119,7 @@ export default function SimApp() {
 
   if (stage === 'desk')
     return (
+      <SimFrame stage={0}>
       <Desk
         world={BEFORE}
         notes={saved.notes}
@@ -126,14 +128,19 @@ export default function SimApp() {
         onJoin={() => (setCamOn(true), setStage('lobby'))}
         overlay={<Brief />}
       />
+      </SimFrame>
     );
 
   if (stage === 'lobby')
-    return <Lobby typed={saved.typed} onJoin={join} onBack={() => (setCamOn(false), setStage('desk'))} stream={cam.stream} denied={cam.denied} camOn={camOn && !cam.denied} setCamOn={setCamOn} />;
+    return (
+      <SimFrame stage={1}>
+        <Lobby typed={saved.typed} onJoin={join} onBack={() => (setCamOn(false), setStage('desk'))} stream={cam.stream} denied={cam.denied} camOn={camOn && !cam.denied} setCamOn={setCamOn} />
+      </SimFrame>
+    );
 
   if (stage === 'call')
     return (
-      <>
+      <SimFrame stage={1}>
         <VideoCall
           status={call.status}
           lines={call.lines}
@@ -170,7 +177,7 @@ export default function SimApp() {
             </button>
           </div>
         )}
-      </>
+      </SimFrame>
     );
 
   if (stage === 'passing') return <Passing />;
@@ -178,6 +185,7 @@ export default function SimApp() {
   const run = saved.run;
   if (stage === 'later' && run)
     return (
+      <SimFrame stage={2}>
       <Desk
         key="later"
         world={LATER(run.tier)}
@@ -185,6 +193,7 @@ export default function SimApp() {
         setNotes={(notes) => setSaved((s) => ({ ...s, notes }))}
         overlay={<LaterCard onNext={() => setStage('debrief')} />}
       />
+      </SimFrame>
     );
 
   if (run) return <Debrief run={run} typed={saved.typed} onReplay={restart} />;
@@ -194,7 +203,7 @@ export default function SimApp() {
 /* ---------------------------------------------------------------- stages */
 
 function Arrive({ saved, setTyped, onStart, onLast }: { saved: Saved; setTyped: (t: boolean) => void; onStart: () => void; onLast: () => void }) {
-  const lines = ['Monday, 9:12 AM.', 'You lead a team of six at a client services firm.', 'Your 1:1 with Jordan Ellis is at 9:30.', 'Something is wrong. Nobody has said what.'];
+  const lines = ['Monday, 9:12 AM.', 'You lead a team of six at Regal Services.', 'Your 1:1 with Jordan Ellis is at 9:30.', 'Something is wrong. Nobody has said what.'];
   const [n, setN] = useState(0);
   useEffect(() => {
     if (n >= lines.length) return;
@@ -203,12 +212,15 @@ function Arrive({ saved, setTyped, onStart, onLast }: { saved: Saved; setTyped: 
   }, [n]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <main className="relative grid min-h-[100dvh] place-items-center overflow-hidden bg-ink px-6">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-40" style={{ background: `center/cover url(${MEDIA.wallpaper})`, filter: 'blur(28px) brightness(0.45)' }} />
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(60% 50% at 70% 100%, ${REGAL.gold}22, transparent 70%), radial-gradient(50% 50% at 20% 0%, #FF5A1F1f, transparent 70%)` }} />
       <a href="/" className="absolute left-6 top-6 text-[18px] text-bone" aria-label="Matchlight home">
         <Wordmark />
       </a>
       <div className="relative w-full max-w-3xl">
         <p className="label text-ember">Matchlight demo · a workplace simulation</p>
+        <div className="mt-6 inline-flex items-center gap-3 rounded-full border border-bone/10 bg-char/60 px-4 py-2 text-[13px] text-bone/70">
+          <span className="text-ash">Set at</span> <RegalMark size={18} /> <span className="text-ash">(a fictional company)</span>
+        </div>
         <div className="mt-8 space-y-3" aria-live="polite">
           {lines.slice(0, n).map((l, i) => (
             <p key={l} className={`toast-in ${i === 0 ? 'text-[48px] font-semibold leading-[1] tracking-[-0.04em] text-bone md:text-[88px]' : 'text-[20px] text-bone/75 md:text-[26px]'}`}>

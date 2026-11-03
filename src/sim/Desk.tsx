@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { CalendarDays, FileText, Mail as MailIcon, MessageCircle, StickyNote, Video, X } from 'lucide-react';
 import type { App, CalEvent, World } from './world';
+import { REGAL, RegalMark } from './Regal';
 
 export const MEDIA = {
   portrait: '/jordan/portrait.webp',
@@ -108,14 +109,19 @@ export default function Desk({ world, onOpen, onJoin, notes, setNotes, overlay, 
   } as Record<App, number>;
 
   return (
-    <div className="os fixed inset-0 overflow-hidden bg-[#1b1d22] text-[#1d1d1f]">
-      {/* wallpaper */}
-      <div aria-hidden className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${MEDIA.wallpaper}), radial-gradient(120% 80% at 50% 100%, #b5532a 0%, #3a2a2e 40%, #14161c 80%)` }} />
-      <div aria-hidden className="absolute inset-0 bg-black/10" />
+    <div className="os absolute inset-0 overflow-hidden text-[#1d1d1f]" style={{ background: REGAL.navyDeep }}>
+      {/* Regal company wallpaper */}
+      <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(90% 70% at 70% 110%, ${REGAL.gold}33 0%, transparent 55%), radial-gradient(80% 80% at 10% -10%, #2a3d66 0%, transparent 60%), linear-gradient(160deg, ${REGAL.navy} 0%, ${REGAL.navyDeep} 100%)` }} />
+      <div aria-hidden className="absolute inset-0 grid place-items-center opacity-[0.07]">
+        <RegalMark size={120} />
+      </div>
 
       {/* menu bar */}
       <div className="relative z-20 flex h-8 items-center justify-between bg-black/30 px-4 text-[13px] text-white/90 backdrop-blur-xl">
-        <span className="font-semibold">{app ? APPS.find((a) => a.id === app)!.name : 'Desktop'}</span>
+        <span className="flex items-center gap-3">
+          <RegalMark size={16} />
+          <span className="font-semibold">{app ? APPS.find((a) => a.id === app)!.name : ''}</span>
+        </span>
         <span className="tabular-nums">
           {world.dateLine.replace(/^(\w{3})\w*,/, '$1,')} &nbsp;{clock}
         </span>
