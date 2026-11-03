@@ -158,7 +158,7 @@ ul.clean li { margin: 3pt 0; }
     var p2 =
       '<section class="page">' +
         '<div class="section"><div class="mono">01 · Summary</div><h2 style="margin-top:6pt">Practice the moments that <em>matter</em>, before they happen.</h2>' +
-          '<p class="lead">' + (q.client ? esc(q.client) + '’s' : 'Your') + ' people will step into a realistic workplace, read the signals, hold the conversation, and see what happens two weeks later. Every choice is coached, so the skill transfers to the real conversation.</p></div>' +
+          '<p class="lead">' + (q.client ? esc(q.client) + (/s$/i.test(q.client) ? '’' : '’s') : 'Your') + ' people will step into a realistic workplace, read the signals, hold the conversation, and see what happens two weeks later. Every choice is coached, so the skill transfers to the real conversation.</p></div>' +
         '<div class="section"><div class="mono">02 · What we build</div><div class="scope">' +
           (q.notes || []).map(function (n) { return '<div><h3>' + esc(n[0]) + '</h3><p>' + esc(n[1]) + '</p></div>'; }).join('') + '</div></div>' +
         foot('2') +
