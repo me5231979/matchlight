@@ -79,13 +79,30 @@ export default function Hero({ ignited }: { ignited: boolean }) {
     const c = card.current!;
     const o = old.current!;
     const ringEl = ring.current!;
+    // The lens is a round window: an outer circle that moves, and the new world inside it
+    // moving the opposite way. Moving it is transform-only (no repaint); size changes are rare.
+    const inner = o.firstElementChild as HTMLElement;
+    let lastR = -1;
+    let lastXY = '';
     const write = (x: number, y: number, rad: number) => {
-      const m = `radial-gradient(circle ${Math.max(0, rad)}px at ${x}px ${y}px, transparent 0, transparent 80%, #000 100%)`;
-      o.style.webkitMaskImage = m;
-      o.style.maskImage = m;
-      ringEl.style.transform = `translate3d(${x - rad}px, ${y - rad}px, 0)`;
-      ringEl.style.width = ringEl.style.height = `${rad * 2}px`;
-      ringEl.style.opacity = rad > 4 ? '1' : '0';
+      const r = Math.max(0, Math.round(rad));
+      if (Math.abs(r - lastR) >= 2 || (r === 0) !== (lastR === 0)) {
+        lastR = r;
+        o.style.width = o.style.height = `${r * 2}px`;
+        ringEl.style.width = ringEl.style.height = `${r * 2}px`;
+        ringEl.style.opacity = r > 4 ? '1' : '0';
+        inner.style.width = `${c.clientWidth}px`;
+        inner.style.height = `${c.clientHeight}px`;
+        lastXY = '';
+      }
+      const tx = (x - lastR).toFixed(1);
+      const ty = (y - lastR).toFixed(1);
+      const key = `${tx}|${ty}`;
+      if (key === lastXY) return;
+      lastXY = key;
+      o.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
+      inner.style.transform = `translate3d(${-tx}px, ${-ty}px, 0)`;
+      ringEl.style.transform = `translate3d(${tx}px, ${ty}px, 0)`;
     };
 
     if (reduced) {
@@ -95,6 +112,14 @@ export default function Hero({ ignited }: { ignited: boolean }) {
     }
 
     const size = () => c.getBoundingClientRect();
+    // Cached card size: reading layout every frame would force reflow.
+    const dims = { width: c.clientWidth, height: c.clientHeight };
+    const ro = new ResizeObserver(() => {
+      dims.width = c.clientWidth;
+      dims.height = c.clientHeight;
+      lastR = -1; // re-size the window contents on the next frame
+    });
+    ro.observe(c);
     const b0 = size();
     // Start where the strike's spark flared (72% / 50%).
     const s: Lens = {
@@ -125,7 +150,7 @@ export default function Hero({ ignited }: { ignited: boolean }) {
     c.addEventListener('pointerdown', onMove, { passive: true });
 
     const tick = (_t: number, dt: number) => {
-      const b = size();
+      const b = dims;
       s.t += dt / 1000;
       const idle = performance.now() - s.lastMove > 2400;
       if (idle) {
@@ -139,11 +164,21 @@ export default function Hero({ ignited }: { ignited: boolean }) {
       s.boost *= 0.93;
       const target = s.started ? s.base + s.boost + s.scrollGrow : 0;
       s.r += (target - s.r) * 0.1;
-      // Flame flicker on the rim.
-      const flicker = 1 + Math.sin(s.t * 13) * 0.006 + Math.sin(s.t * 7.3) * 0.008;
-      write(s.x, s.y, s.r * flicker);
+      write(s.x, s.y, s.r);
     };
-    gsap.ticker.add(tick);
+    // Only run while the hero is on screen; pause its CSS animations otherwise.
+    let running = false;
+    const io = new IntersectionObserver(([en]) => {
+      c.classList.toggle('hero-paused', !en.isIntersecting);
+      if (en.isIntersecting && !running) {
+        gsap.ticker.add(tick);
+        running = true;
+      } else if (!en.isIntersecting && running) {
+        gsap.ticker.remove(tick);
+        running = false;
+      }
+    });
+    io.observe(c);
 
     const setBase = () => (s.base = Math.min(240, Math.max(120, size().width * 0.15)));
     setBase();
@@ -157,6 +192,8 @@ export default function Hero({ ignited }: { ignited: boolean }) {
     });
 
     return () => {
+      io.disconnect();
+      ro.disconnect();
       gsap.ticker.remove(tick);
       c.removeEventListener('pointermove', onMove);
       c.removeEventListener('pointerdown', onMove);
@@ -194,35 +231,35 @@ export default function Hero({ ignited }: { ignited: boolean }) {
   return (
     <section ref={section} id="top" className="relative h-[100svh] min-h-[640px] w-full p-3 md:p-6" aria-labelledby="hero-title">
       <div ref={card} data-hero-card className="relative h-full w-full overflow-hidden rounded-[20px] md:rounded-[32px]">
-        {/* New world (underneath): ember haze, sparks, live work. */}
-        <div className="absolute inset-0" style={{ background: NEW_BG }}>
+        {/* Old world (base): static, painted once. */}
+        <div className="absolute inset-0 bg-[#121211]">
+          <OldWorld />
+        </div>
+
+        {/* New world (revealed): seen through the round lens window. */}
+        <div ref={old} className="absolute left-0 top-0 overflow-hidden rounded-full will-change-transform" style={{ width: 0, height: 0 }}>
+          <div className="absolute left-0 top-0 h-full w-full will-change-transform" style={{ background: NEW_BG }}>
           <div aria-hidden className="ember-haze pointer-events-none absolute inset-0 overflow-hidden">
             <span className="haze-a" />
             <span className="haze-b" />
             <span className="haze-c" />
           </div>
-          <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.4] mix-blend-overlay" />
           {fx && !mobile && (
             <Suspense fallback={null}>
-              <SparkField count={2000} />
+              <SparkField count={1400} />
             </Suspense>
           )}
           <NewWorld />
-        </div>
-
-        {/* Old world (surface), cut away by the lens. */}
-        <div ref={old} className="absolute inset-0 bg-[#121211]">
-          <OldWorld />
+          </div>
         </div>
 
         {/* The match: ember rim around the lens. */}
         <div
           ref={ring}
           aria-hidden
-          className="pointer-events-none absolute left-0 top-0 rounded-full opacity-0"
+          className="lens-ring pointer-events-none absolute left-0 top-0 rounded-full opacity-0"
           style={{
             boxShadow: 'inset 0 0 0 1px rgba(255,181,71,0.55), inset 0 0 40px 6px rgba(255,90,31,0.35), 0 0 60px 8px rgba(255,90,31,0.22)',
-            mixBlendMode: 'screen',
           }}
         />
 

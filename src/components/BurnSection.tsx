@@ -19,7 +19,7 @@ function BurnFilters() {
       <defs>
         {problem.burn.map((_, i) => (
           <filter key={i} id={`burn-${i}`} x="-5%" y="-25%" width="110%" height="150%" colorInterpolationFilters="sRGB">
-            <feTurbulence type="fractalNoise" baseFrequency="0.011 0.018" numOctaves="4" seed={i * 11 + 3} result="noise" />
+            <feTurbulence type="fractalNoise" baseFrequency="0.011 0.018" numOctaves="2" seed={i * 11 + 3} result="noise" />
             <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  1 0 0 0 0" result="n" />
             <feComponentTransfer in="n" result="keep">
               <feFuncA data-k type="linear" slope="14" intercept={K_START} />
@@ -58,6 +58,10 @@ export default function BurnSection() {
         const words = Array.from(stage.current!.querySelectorAll<HTMLElement>('[data-burn]'));
         const filters = problem.burn.map((_, i) => document.getElementById(`burn-${i}`)!);
         const setBurn = (i: number, p: number) => {
+          // Only run the (expensive) SVG filter while a word is actually burning.
+          const burning = p > 0.001 && p < 0.999;
+          const f = burning ? `url(#burn-${i})` : 'none';
+          if (words[i].style.filter !== f) words[i].style.filter = f;
           const k = K_START + (K_END - K_START) * p;
           filters[i].querySelector('[data-k]')!.setAttribute('intercept', String(k));
           filters[i].querySelector('[data-e]')!.setAttribute('intercept', String(k + EDGE));
@@ -212,12 +216,11 @@ export default function BurnSection() {
             </h2>
           </div>
           <ul className="relative" aria-label="What most training measures">
-            {problem.burn.map((w, i) => (
+            {problem.burn.map((w) => (
               <li
                 key={w}
                 data-burn
                 className="w-fit text-[52px] font-semibold leading-[1.02] tracking-[-0.04em] text-ash motion-reduce:line-through motion-reduce:decoration-ember/70 motion-reduce:decoration-2 md:text-[clamp(64px,8.6vw,132px)]"
-                style={{ filter: `url(#burn-${i})` }}
               >
                 {w}
               </li>

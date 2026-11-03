@@ -166,7 +166,7 @@ export default function SparkField({ count }: { count: number }) {
     <div ref={host} className="pointer-events-none absolute inset-0" aria-hidden>
       <Canvas
         frameloop={visible ? 'always' : 'never'}
-        dpr={[1, 1.75]}
+        dpr={[1, 1.25]}
         gl={{ antialias: false, alpha: true, powerPreference: 'high-performance' }}
         onCreated={({ gl }) => gl.setClearColor(0x000000, 0)}
         style={{ position: 'absolute', inset: 0 }}

@@ -54,15 +54,12 @@ export default function Beliefs() {
                 .fromTo(line, { rotate: 3, transformOrigin: '0% 50%' }, { rotate: 0, ease: 'none' }, 0)
                 .fromTo(words, { opacity: 0.1, filter: 'blur(4px)' }, { opacity: 1, filter: 'blur(0px)', ease: 'none', stagger: 0.05 }, 0);
               if (desktop) {
-                enter.fromTo(
-                  line,
-                  { fontWeight: 400, letterSpacing: '0.01em' },
-                  { fontWeight: 600, letterSpacing: '-0.035em', ease: 'none' },
-                  0,
-                );
+                // Type shifts as it enters and leaves (transform only: no text re-flow).
+                enter.fromTo(line, { scaleX: 1.06, skewX: -6, transformOrigin: '0% 50%' }, { scaleX: 1, skewX: 0, ease: 'none' }, 0);
                 gsap.to(line, {
-                  fontWeight: 400,
-                  letterSpacing: '0.02em',
+                  scaleX: 0.97,
+                  skewX: 4,
+                  yPercent: -8,
                   opacity: 0.25,
                   ease: 'none',
                   scrollTrigger: { trigger: block, start: 'center 35%', end: 'bottom top', scrub: true },
