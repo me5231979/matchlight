@@ -78,5 +78,6 @@ export const navLinks = [
   { id: 'services', label: 'Services', href: '#offerings', preview: 'Consulting, custom builds, and a development partner that hands it over.' },
   { id: 'how', label: 'How we work', href: '#process', preview: 'Strike. First light. Shape. Ship.' },
   { id: 'beliefs', label: 'Beliefs', href: '#beliefs', preview: 'Capability is the outcome. Everything else is overhead.' },
+  { id: 'demo', label: 'Demo', href: '/demo', preview: 'Practice a hard conversation out loud with Jordan, a direct report played by AI.' },
   { id: 'contact', label: 'Contact', href: '#cta', preview: 'One conversation to scope it. A working version in days.' },
 ];

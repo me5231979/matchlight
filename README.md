@@ -24,6 +24,22 @@ npx vercel --prod   # production
 
 Or import the GitHub repo in the Vercel dashboard. No environment variables are needed.
 
+## Demo course: The Hard Conversation (`/demo`)
+
+A research-backed voice simulation. Managers practice a performance conversation out loud with **Jordan**, a direct report played by an ElevenLabs Conversational AI agent running on Claude. A coach (Claude Opus 5.5) scores each round against a five-behavior rubric.
+
+Flow: cold open, mirror (self-rate, then coach), see it done (contrasting cases), drills (one move each), harder (three Jordans, hints fade), plan it (rehearse a real conversation), results (before and after, spaced reps via `.ics`). Each step has a "Why this step works" panel citing the research.
+
+| Piece | Where |
+|---|---|
+| Jordan (voice agent) | ElevenLabs agent `agent_4001m6fw27x8f6tb85497ks89dvx`, LLM `claude-haiku-5-5`. Session variables: `first_line`, `persona`, `mode`, `context`. Text-only override allowed for typed mode. |
+| Coach scoring | `api/score.ts` (Vercel function). Needs `ANTHROPIC_API_KEY` in the Vercel project's environment variables. Uses server-side refusal fallbacks (`fallbacks: "default"`). |
+| Course UI | `src/course/` (`CourseApp.tsx`, `useJordan.ts`, `CallPanel.tsx`, `Feedback.tsx`, `data.ts`). |
+
+Local UI testing without network: `npm run dev`, then open `/demo?mock=1` (scripted Jordan and scores; dev builds only).
+
+Before sharing publicly: in the ElevenLabs dashboard, open the Jordan agent's Security settings, enable an origin allowlist, and add your site's domains, so nobody else can spend your credits.
+
 ## Structure
 
 | Path | What it is |

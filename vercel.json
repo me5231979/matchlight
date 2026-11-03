@@ -21,6 +21,15 @@
     {
       "source": "/legal",
       "destination": "/index.html"
+    },
+    {
+      "source": "/demo",
+      "destination": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "api/score.ts": {
+      "maxDuration": 60
+    }
+  }
 }

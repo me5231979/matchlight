@@ -45,6 +45,20 @@ function Preview({ id }: { id: string }) {
         <span className="text-sm text-ash">02 of 05</span>
       </div>
     );
+  if (id === 'demo')
+    return (
+      <div className="flex h-full flex-col justify-between p-6">
+        <span className="label text-ash">Demo course</span>
+        <div className="flex items-center gap-5">
+          <span
+            className="h-20 w-20 shrink-0 rounded-full"
+            style={{ background: 'radial-gradient(circle at 40% 35%, #FFB547 0%, #FF5A1F 40%, rgba(184,54,10,0.5) 65%, transparent 72%)' }}
+          />
+          <p className="text-[28px] font-semibold leading-[1.1] tracking-[-0.02em] text-bone">Talk to Jordan.</p>
+        </div>
+        <span className="text-sm text-bone/70">The Hard Conversation · voice practice with an AI coach</span>
+      </div>
+    );
   if (id === 'contact')
     return (
       <div className="flex h-full flex-col justify-between p-6">
@@ -140,6 +154,7 @@ export default function Nav() {
   }, [open, close]);
 
   const go = (href: string) => (e: React.MouseEvent) => {
+    if (!href.startsWith('#')) return; // real page, let the browser navigate
     e.preventDefault();
     close(false);
     window.setTimeout(() => scrollToTarget(href), 250);

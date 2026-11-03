@@ -5,7 +5,7 @@ import { company } from '../lib/company';
 const columns = [
   { title: 'Services', links: [['Capability consulting', '#offerings'], ['Custom builds', '#offerings'], ['Development partner', '#offerings']] },
   { title: 'We build', links: [['Simulations', '#offerings'], ['AI practice partners', '#offerings'], ['Platforms and sites', '#offerings']] },
-  { title: 'Studio', links: [['How we work', '#process'], ['What we believe', '#beliefs'], ['Start a build', '#cta']] },
+  { title: 'Studio', links: [['How we work', '#process'], ['What we believe', '#beliefs'], ['Try the demo', '/demo'], ['Start a build', '#cta']] },
 ];
 
 /**
