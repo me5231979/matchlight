@@ -3,20 +3,70 @@
 @tailwind utilities;
 
 /* ---------- Brand tokens (Matchlight_Brand.md section 4) ---------- */
-:root {
-  --ink: #0e0e0c;
-  --char: #1c1b19;
-  --bone: #f5f2ec;
-  --smoke: #e6e1d8;
-  --ember: #ff5a1f;
-  --ember-deep: #b8360a;
-  --flare: #ffb547;
-  --ash: #8a857c;
-  --slate: #5e5a53;
-  --line: rgba(245, 242, 236, 0.08);
+/* Colors are RGB channels so Tailwind opacity modifiers work, and so a client
+   theme (see .theme-regal) can re-skin the whole experience in one place. */
+:root,
+.theme-matchlight {
+  --c-ink: 14 14 12;
+  --c-char: 28 27 25;
+  --c-bone: 245 242 236;
+  --c-smoke: 230 225 216;
+  --c-ember: 255 90 31;
+  --c-ember-deep: 184 54 10;
+  --c-flare: 255 181 71;
+  --c-ash: 138 133 124;
+  --c-slate: 94 90 83;
+  --panel: #0b0b0a;
+  --orb: radial-gradient(circle at 38% 32%, #ffe1b0 0%, #ffb547 18%, #ff5a1f 48%, #8a2a08 78%, #2a0f05 100%);
+  --font-display: 'Geist', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Regal Services: the fictional client the demo is built for. Navy, gold, cream, serif headlines. */
+.theme-regal {
+  --c-ink: 11 20 40;
+  --c-char: 20 33 61;
+  --c-bone: 247 243 234;
+  --c-smoke: 233 226 208;
+  --c-ember: 200 162 74;
+  --c-ember-deep: 156 122 44;
+  --c-flare: 227 199 122;
+  --c-ash: 154 163 181;
+  --c-slate: 107 117 144;
+  --panel: #0e1a33;
+  --orb: radial-gradient(circle at 38% 32%, #fbefc9 0%, #e3c77a 22%, #c8a24a 50%, #6b5420 80%, #1a1408 100%);
+  --font-display: Georgia, 'Times New Roman', serif;
+}
+
+:root,
+.theme-matchlight,
+.theme-regal {
+  --ink: rgb(var(--c-ink));
+  --char: rgb(var(--c-char));
+  --bone: rgb(var(--c-bone));
+  --smoke: rgb(var(--c-smoke));
+  --ember: rgb(var(--c-ember));
+  --ember-deep: rgb(var(--c-ember-deep));
+  --flare: rgb(var(--c-flare));
+  --ash: rgb(var(--c-ash));
+  --slate: rgb(var(--c-slate));
+  --line: rgb(var(--c-bone) / 0.08);
   --strike: linear-gradient(90deg, transparent 0%, var(--ember) 70%, var(--flare) 100%);
   --ease-prisma: cubic-bezier(0.16, 1, 0.3, 1);
   color-scheme: dark;
+}
+
+.theme-regal h1,
+.theme-regal h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.015em;
+}
+.theme-regal .theme-matchlight h1,
+.theme-regal .theme-matchlight h2 {
+  font-family: 'Geist', ui-sans-serif, system-ui, sans-serif;
+}
+.theme-regal .accent {
+  font-family: var(--font-display);
 }
 
 @layer base {

@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ArrowRight, Check, Headphones, Keyboard, Lock, Minus, RotateCcw } from 'lucide-react';
-import { Wordmark } from '../components/Nav';
 import { CoachNote, ScoreBars, TaggedTranscript, scoringMessage } from '../course/Feedback';
 import { DEFAULT_PERSONA } from '../course/data';
 import { scoreTranscript, useJordan, type Line, type ScoreResult } from '../course/useJordan';
 import Desk from './Desk';
-import { REGAL, RegalMark, SimFrame } from './Regal';
+import { BuiltBy, REGAL, RegalMark, SimFrame } from './Regal';
 import VideoCall, { Lobby, useCamera } from './VideoCall';
 import { FIRST_LINE, useMia } from './useMia';
 import { BEFORE, CLUES, LATER, type Tier } from './world';
@@ -212,18 +211,19 @@ function Arrive({ saved, setTyped, onStart, onLast }: { saved: Saved; setTyped: 
   }, [n]); // eslint-disable-line react-hooks/exhaustive-deps
   return (
     <main className="relative grid min-h-[100dvh] place-items-center overflow-hidden bg-ink px-6">
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(60% 50% at 70% 100%, ${REGAL.gold}22, transparent 70%), radial-gradient(50% 50% at 20% 0%, #FF5A1F1f, transparent 70%)` }} />
-      <a href="/" className="absolute left-6 top-6 text-[18px] text-bone" aria-label="Matchlight home">
-        <Wordmark />
-      </a>
-      <div className="relative w-full max-w-3xl">
-        <p className="label text-ember">Matchlight demo · a workplace simulation</p>
-        <div className="mt-6 inline-flex items-center gap-3 rounded-full border border-bone/10 bg-char/60 px-4 py-2 text-[13px] text-bone/70">
-          <span className="text-ash">Set at</span> <RegalMark size={18} /> <span className="text-ash">(a fictional company)</span>
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: `radial-gradient(60% 50% at 70% 100%, ${REGAL.gold}22, transparent 70%), radial-gradient(50% 50% at 20% 0%, rgb(var(--c-ember) / 0.12), transparent 70%)` }} />
+      <div className="absolute inset-x-0 top-0">
+        <BuiltBy />
+        <div className="px-6 pt-6">
+          <RegalMark size={26} />
         </div>
+      </div>
+      <div className="relative w-full max-w-3xl">
+        <p className="label text-ember">Regal Services · Leading through hard moments</p>
+        <p className="mt-3 text-[13px] text-ash">A demo built by Matchlight for a fictional company.</p>
         <div className="mt-8 space-y-3" aria-live="polite">
           {lines.slice(0, n).map((l, i) => (
-            <p key={l} className={`toast-in ${i === 0 ? 'text-[48px] font-semibold leading-[1] tracking-[-0.04em] text-bone md:text-[88px]' : 'text-[20px] text-bone/75 md:text-[26px]'}`}>
+            <p key={l} style={i === 0 ? { fontFamily: 'var(--font-display)' } : undefined} className={`toast-in ${i === 0 ? 'text-[48px] font-medium leading-[1] tracking-[-0.02em] text-bone md:text-[88px]' : 'text-[20px] text-bone/75 md:text-[26px]'}`}>
               {i === 3 ? <span className="accent text-bone">{l}</span> : l}
             </p>
           ))}
@@ -265,7 +265,7 @@ function Brief() {
   const [open, setOpen] = useState(true);
   if (!open) return null;
   return (
-    <div className="absolute left-4 top-28 z-20 w-[300px] max-w-[calc(100vw-32px)] rounded-2xl bg-[#0E0E0C]/85 p-5 text-bone shadow-2xl backdrop-blur-xl lg:top-12">
+    <div className="absolute left-4 top-28 z-20 w-[300px] max-w-[calc(100vw-32px)] rounded-2xl bg-ink/90 p-5 text-bone shadow-2xl backdrop-blur-xl lg:top-12">
       <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ember">Before 9:30</p>
       <p className="mt-2 text-[15px] leading-snug">This is your laptop. Look around if you want to, or join the call now. It's up to you, like it would be.</p>
       <p className="mt-2 text-[13px] text-bone/60">When you're ready, the 1:1 is in your calendar, with a Join button.</p>
@@ -301,7 +301,7 @@ function LaterCard({ onNext }: { onNext: () => void }) {
     return () => window.clearTimeout(id);
   }, []);
   return (
-    <div className={`absolute left-4 top-12 z-20 w-[300px] max-w-[calc(100vw-32px)] rounded-2xl bg-[#0E0E0C]/85 p-5 text-bone shadow-2xl backdrop-blur-xl transition-all duration-700 ${show ? 'opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'}`}>
+    <div className={`absolute left-4 top-12 z-20 w-[300px] max-w-[calc(100vw-32px)] rounded-2xl bg-ink/90 p-5 text-bone shadow-2xl backdrop-blur-xl transition-all duration-700 ${show ? 'opacity-100' : 'pointer-events-none -translate-y-2 opacity-0'}`}>
       <p className="font-mono text-[11px] uppercase tracking-[0.1em] text-ember">Two weeks later</p>
       <p className="mt-2 text-[15px] leading-snug">Read what came in. Then see which moments in the conversation led here.</p>
       <button type="button" onClick={onNext} className="btn-primary mt-4 text-[15px]">
@@ -345,10 +345,9 @@ function Debrief({ run, typed, onReplay }: { run: Run; typed: boolean; onReplay:
 
   return (
     <div className="min-h-[100dvh] bg-ink">
+      <BuiltBy />
       <header className="mx-auto flex max-w-[1200px] items-center justify-between px-4 py-5 md:px-6">
-        <a href="/" className="text-[18px] text-bone" aria-label="Matchlight home">
-          <Wordmark />
-        </a>
+        <RegalMark size={24} />
         <span className="font-mono text-[12px] uppercase tracking-[0.1em] text-ash">Debrief</span>
       </header>
       <main className="mx-auto max-w-[1200px] px-4 pb-32 pt-10 md:px-6 md:pt-16">

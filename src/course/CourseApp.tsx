@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, CalendarPlus, Keyboard, Lock, Mic, RotateCcw } from 'lucide-react';
-import { Wordmark } from '../components/Nav';
+import { BuiltBy, RegalMark } from '../sim/Regal';
 import CallPanel from './CallPanel';
 import { useMia } from '../sim/useMia';
 import { CoachNote, ScoreBars, TaggedTranscript, scoringMessage } from './Feedback';
@@ -221,12 +221,12 @@ function Round({
     return (
       <div className="space-y-6">
         {brief}
-        <div className="relative overflow-hidden rounded-[28px] border border-line bg-[#0b0b0a] px-6 py-12 text-center md:py-16">
-          <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(50% 60% at 50% 30%, rgba(255,90,31,0.14), transparent 70%)' }} />
+        <div className="relative overflow-hidden rounded-[28px] border border-line bg-[var(--panel)] px-6 py-12 text-center md:py-16">
+          <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(50% 60% at 50% 30%, rgb(var(--c-ember) / 0.14), transparent 70%)' }} />
           <div
             aria-hidden
             className="relative mx-auto h-24 w-24 animate-pulse rounded-full"
-            style={{ background: 'radial-gradient(circle at 38% 32%, #FFE1B0 0%, #FFB547 18%, #FF5A1F 48%, #8a2a08 78%, #2a0f05 100%)', boxShadow: '0 0 80px 10px rgba(255,90,31,0.25)' }}
+            style={{ background: 'var(--orb)', boxShadow: '0 0 80px 10px rgb(var(--c-ember) / 0.25)' }}
           />
           <p className="relative mt-6 text-ash">{typed ? 'Jordan will open. Type your replies.' : 'Jordan will open. Answer out loud. Headphones help.'}</p>
           <button type="button" className="btn-primary relative mt-6 text-[17px]" onClick={() => (setPhase('call'), begin({ ...start, limit }))}>
@@ -323,10 +323,11 @@ export default function CourseApp() {
       <a href="#course" className="sr-only-focusable fixed left-4 top-4 z-[300] rounded-full bg-bone px-4 py-2 text-ink">
         Skip to content
       </a>
+      <BuiltBy />
       <header className="sticky top-0 z-40 bg-ink/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-4 px-4 py-4 md:px-6">
-          <a href="/" className="text-[18px] text-bone" aria-label="Matchlight home">
-            <Wordmark />
+          <a href="/demo" aria-label="Regal Services: back to the simulation">
+            <RegalMark size={22} />
           </a>
           {!rep && (
             <nav aria-label="Course steps" className="flex items-center gap-4">
@@ -397,7 +398,7 @@ function StepView(p: StepProps) {
 function Intro({ set, go }: StepProps) {
   return (
     <section className="relative">
-      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[640px] w-[900px] -translate-x-1/2 rounded-full" style={{ background: 'radial-gradient(closest-side, rgba(255,90,31,0.18), transparent)' }} />
+      <div aria-hidden className="pointer-events-none absolute -top-40 left-1/2 h-[640px] w-[900px] -translate-x-1/2 rounded-full" style={{ background: 'radial-gradient(closest-side, rgb(var(--c-ember) / 0.18), transparent)' }} />
       <div className="relative grid items-center gap-14 lg:grid-cols-12">
         <div className="lg:col-span-7">
           <p className="label text-ember">Matchlight demo · voice simulation</p>
@@ -432,13 +433,13 @@ function Intro({ set, go }: StepProps) {
 
         {/* Jordan's file */}
         <div className="lg:col-span-5">
-          <div className="relative overflow-hidden rounded-[28px] border border-line bg-[#0b0b0a] p-7">
-            <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(70% 50% at 50% 0%, rgba(255,90,31,0.14), transparent 70%)' }} />
+          <div className="relative overflow-hidden rounded-[28px] border border-line bg-[var(--panel)] p-7">
+            <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(70% 50% at 50% 0%, rgb(var(--c-ember) / 0.14), transparent 70%)' }} />
             <div className="relative flex items-center gap-5">
               <div
                 aria-hidden
                 className="h-20 w-20 shrink-0 rounded-full"
-                style={{ background: 'radial-gradient(circle at 38% 32%, #FFE1B0 0%, #FFB547 18%, #FF5A1F 48%, #8a2a08 78%, #2a0f05 100%)', boxShadow: '0 0 50px 4px rgba(255,90,31,0.25)' }}
+                style={{ background: 'var(--orb)', boxShadow: '0 0 50px 4px rgb(var(--c-ember) / 0.25)' }}
               />
               <div>
                 <p className="text-[22px] font-semibold tracking-[-0.01em] text-bone">{SCENARIO.who}</p>

@@ -30,14 +30,34 @@ export function RegalMark({ size = 22, light = true }: { size?: number; light?: 
   );
 }
 
+/** A slim Matchlight strip: who built this, in Matchlight's own look. */
+export function BuiltBy({ right }: { right?: ReactNode }) {
+  return (
+    <div className="theme-matchlight relative z-50 flex h-9 shrink-0 items-center justify-between gap-4 bg-ink px-3 text-[12px] text-bone/70 md:px-5" style={{ background: 'var(--ink)' }}>
+      <a href="/" className="flex items-center gap-2 hover:text-bone" aria-label="Built by Matchlight. Go to Matchlight home">
+        <span className="font-mono uppercase tracking-[0.1em] text-ash">Built by</span>
+        <span className="text-[14px] text-bone">
+          <Wordmark />
+        </span>
+      </a>
+      {right ?? (
+        <a href="/" className="inline-flex items-center gap-1.5 hover:text-bone">
+          <ArrowLeft size={13} strokeWidth={1.5} aria-hidden /> Exit demo
+        </a>
+      )}
+    </div>
+  );
+}
+
 const STAGES = ['Before the call', 'The 1:1', 'Two weeks later'] as const;
 
 /** The Matchlight frame: our bar on top, the client's world inset below. */
 export function SimFrame({ stage, children }: { stage: 0 | 1 | 2; children: ReactNode }) {
   return (
-    <div className="fixed inset-0 flex flex-col bg-ink">
+    <div className="theme-matchlight fixed inset-0 flex flex-col bg-ink">
       <header className="flex h-11 shrink-0 items-center justify-between gap-4 px-3 md:px-5">
-        <a href="/" className="text-[15px] text-bone" aria-label="Matchlight home">
+        <a href="/" className="flex items-center gap-2 text-[14px] text-bone" aria-label="Built by Matchlight. Go to Matchlight home">
+          <span className="font-mono text-[11px] uppercase tracking-[0.1em] text-ash">Built by</span>
           <Wordmark />
         </a>
         <ol className="hidden items-center gap-2 font-mono text-[11px] uppercase tracking-[0.1em] sm:flex" aria-label="Simulation progress">
@@ -53,7 +73,7 @@ export function SimFrame({ stage, children }: { stage: 0 | 1 | 2; children: Reac
           <ArrowLeft size={14} strokeWidth={1.5} aria-hidden /> Exit
         </a>
       </header>
-      <div className="relative min-h-0 flex-1 overflow-hidden rounded-t-xl ring-1 ring-bone/10 md:mx-3 md:mb-3 md:rounded-xl">{children}</div>
+      <div className="theme-regal relative min-h-0 flex-1 overflow-hidden rounded-t-xl ring-1 ring-bone/10 md:mx-3 md:mb-3 md:rounded-xl">{children}</div>
     </div>
   );
 }

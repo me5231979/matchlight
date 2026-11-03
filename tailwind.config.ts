@@ -6,16 +6,16 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: '#0E0E0C',
-        char: '#1C1B19',
-        bone: '#F5F2EC',
-        smoke: '#E6E1D8',
-        ember: '#FF5A1F',
-        'ember-deep': '#B8360A',
-        flare: '#FFB547',
-        ash: '#8A857C',
-        slate: '#5E5A53',
-        line: 'rgba(245,242,236,0.08)',
+        ink: 'rgb(var(--c-ink) / <alpha-value>)',
+        char: 'rgb(var(--c-char) / <alpha-value>)',
+        bone: 'rgb(var(--c-bone) / <alpha-value>)',
+        smoke: 'rgb(var(--c-smoke) / <alpha-value>)',
+        ember: 'rgb(var(--c-ember) / <alpha-value>)',
+        'ember-deep': 'rgb(var(--c-ember-deep) / <alpha-value>)',
+        flare: 'rgb(var(--c-flare) / <alpha-value>)',
+        ash: 'rgb(var(--c-ash) / <alpha-value>)',
+        slate: 'rgb(var(--c-slate) / <alpha-value>)',
+        line: 'var(--line)',
       },
       fontFamily: {
         sans: ['Geist', 'ui-sans-serif', 'system-ui', 'sans-serif'],

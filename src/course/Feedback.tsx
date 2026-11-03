@@ -12,18 +12,18 @@ function Dial({ score, before }: { score: number; before?: number }) {
     <svg viewBox="0 0 80 80" className="h-20 w-20" aria-hidden>
       <defs>
         <linearGradient id="dialg" x1="0" x2="1" y1="1" y2="0">
-          <stop offset="0" stopColor="#FF5A1F" />
-          <stop offset="1" stopColor="#FFB547" />
+          <stop offset="0" style={{ stopColor: 'var(--ember)' }} />
+          <stop offset="1" style={{ stopColor: 'var(--flare)' }} />
         </linearGradient>
       </defs>
       <g transform="rotate(135 40 40)">
-        <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(245,242,236,0.1)" strokeWidth="5" strokeDasharray={`${c * 0.75} ${c}`} strokeLinecap="round" />
+        <circle cx="40" cy="40" r={r} fill="none" stroke="rgb(var(--c-bone) / 0.1)" strokeWidth="5" strokeDasharray={`${c * 0.75} ${c}`} strokeLinecap="round" />
         {before !== undefined && before > 0 && (
-          <circle cx="40" cy="40" r={r} fill="none" stroke="rgba(245,242,236,0.25)" strokeWidth="5" strokeDasharray={`${arc(before)} ${c}`} strokeLinecap="round" />
+          <circle cx="40" cy="40" r={r} fill="none" stroke="rgb(var(--c-bone) / 0.25)" strokeWidth="5" strokeDasharray={`${arc(before)} ${c}`} strokeLinecap="round" />
         )}
         {score > 0 && <circle cx="40" cy="40" r={r} fill="none" stroke="url(#dialg)" strokeWidth="5" strokeDasharray={`${arc(score)} ${c}`} strokeLinecap="round" />}
       </g>
-      <text x="40" y="46" textAnchor="middle" fill="#F5F2EC" fontFamily="Geist, sans-serif" fontSize="20" fontWeight="600">
+      <text x="40" y="46" textAnchor="middle" fill="currentColor" className="text-bone" fontFamily="Geist, sans-serif" fontSize="20" fontWeight="600">
         {score}
       </text>
     </svg>
@@ -84,7 +84,7 @@ export function ScoreBars({ result, focus, compare }: { result: ScoreResult; foc
 export function CoachNote({ result }: { result: ScoreResult }) {
   return (
     <div className="relative overflow-hidden rounded-2xl border border-line bg-char/60 p-6 md:p-8">
-      <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,90,31,0.18), transparent 70%)' }} />
+      <div aria-hidden className="pointer-events-none absolute -right-20 -top-20 h-56 w-56 rounded-full" style={{ background: 'radial-gradient(circle, rgb(var(--c-ember) / 0.18), transparent 70%)' }} />
       <p className="label text-ash">The coach</p>
       <p className="mt-4 text-body-l text-bone/90">{result.summary}</p>
       <p className="label mt-8 text-ash">Next time, try saying</p>

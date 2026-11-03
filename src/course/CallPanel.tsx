@@ -76,9 +76,9 @@ export default function CallPanel({ status, lines, speaking, elapsed, limit, typ
   const pct = limit ? Math.max(0, 1 - elapsed / limit) : 1;
 
   return (
-    <div className="relative overflow-hidden rounded-[28px] border border-line bg-[#0b0b0a]">
+    <div className="relative overflow-hidden rounded-[28px] border border-line bg-[var(--panel)]">
       {/* ambient */}
-      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 55% at 50% 38%, rgba(255,90,31,0.16), transparent 70%)' }} />
+      <div aria-hidden className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 55% at 50% 38%, rgb(var(--c-ember) / 0.16), transparent 70%)' }} />
       <div aria-hidden className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.05]" />
 
       {/* time drains across the top */}
@@ -102,7 +102,7 @@ export default function CallPanel({ status, lines, speaking, elapsed, limit, typ
         {/* Jordan */}
         <div className="flex flex-1 flex-col items-center justify-center px-6 pb-4 pt-6">
           {video ? (
-            <div className={`relative aspect-video w-full max-w-3xl overflow-hidden rounded-2xl bg-black transition-shadow ${speaking ? 'shadow-[0_0_0_3px_rgba(255,90,31,0.7)]' : 'shadow-[0_0_0_1px_rgba(245,242,236,0.12)]'}`}>
+            <div className={`relative aspect-video w-full max-w-3xl overflow-hidden rounded-2xl bg-black transition-shadow ${speaking ? 'shadow-[0_0_0_3px_rgb(var(--c-ember) / 0.7)]' : 'shadow-[0_0_0_1px_rgb(var(--c-bone) / 0.12)]'}`}>
               <img src={MEDIA.portrait} alt="" className="absolute inset-0 h-full w-full object-cover" />
               <video id={AVATAR_VIDEO_ID} autoPlay playsInline aria-label={name} className="absolute inset-0 h-full w-full object-cover transition-opacity duration-500" style={{ opacity: video === 'live' ? 1 : 0 }} />
               {video === 'starting' && <span className="absolute inset-x-0 bottom-3 text-center text-[13px] text-bone/80">Connecting…</span>}
@@ -115,8 +115,8 @@ export default function CallPanel({ status, lines, speaking, elapsed, limit, typ
               ref={core}
               className="absolute inset-6 rounded-full"
               style={{
-                background: 'radial-gradient(circle at 38% 32%, #FFE1B0 0%, #FFB547 18%, #FF5A1F 48%, #8a2a08 78%, #2a0f05 100%)',
-                boxShadow: speaking ? '0 0 120px 20px rgba(255,90,31,0.35)' : '0 0 70px 6px rgba(255,90,31,0.18)',
+                background: 'var(--orb)',
+                boxShadow: speaking ? '0 0 120px 20px rgb(var(--c-ember) / 0.35)' : '0 0 70px 6px rgb(var(--c-ember) / 0.18)',
                 filter: live ? 'none' : 'grayscale(0.7) brightness(0.6)',
                 transition: 'box-shadow 300ms ease, filter 400ms ease',
               }}
