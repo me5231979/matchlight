@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { gsap, afterIdle } from '../lib/motion';
+import { company } from '../lib/company';
 
 const columns = [
   { title: 'Services', links: [['Capability consulting', '#offerings'], ['Custom builds', '#offerings'], ['Development partner', '#offerings']] },
@@ -83,8 +84,17 @@ export default function Footer() {
         </nav>
       </div>
       <div className="wrap flex flex-wrap justify-between gap-4 pb-6 text-[13px] text-ash">
-        <span>© {new Date().getFullYear()} Matchlight</span>
-        <span>matchlight.ai</span>
+        <span>
+          © {new Date().getFullYear()} {company.legalName}
+        </span>
+        <span className="flex gap-6">
+          <a href="/privacy" className="link-strike hover:text-bone">
+            Privacy
+          </a>
+          <a href="/legal" className="link-strike hover:text-bone">
+            Legal notice
+          </a>
+        </span>
       </div>
       <div aria-hidden className="pointer-events-none relative -mb-[5vw] select-none overflow-hidden px-2">
         <svg data-wordmark viewBox="0 0 1000 200" className="block w-full" role="presentation">

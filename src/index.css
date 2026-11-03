@@ -358,3 +358,29 @@
 @keyframes haze-a { to { transform: translate3d(6%, 8%, 0) scale(1.15); } }
 @keyframes haze-b { to { transform: translate3d(14%, -10%, 0) scale(1.2); } }
 @keyframes haze-c { to { transform: translate3d(-12%, 12%, 0) scale(0.9); } }
+
+/* ---------- Legal pages ---------- */
+.legal h2 {
+  margin-top: 48px;
+  margin-bottom: 12px;
+  font-size: 22px;
+  line-height: 30px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--bone);
+}
+.legal p {
+  margin-top: 12px;
+  color: rgba(245, 242, 236, 0.8);
+}
+.legal a {
+  color: var(--bone);
+  text-decoration: underline;
+  text-decoration-color: var(--ember);
+  text-underline-offset: 3px;
+}
+.legal code {
+  font-family: 'Geist Mono', monospace;
+  font-size: 0.9em;
+  color: var(--bone);
+}
