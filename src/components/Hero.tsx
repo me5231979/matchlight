@@ -135,8 +135,8 @@ export default function Hero({ ignited }: { ignited: boolean }) {
       const idle = performance.now() - s.lastMove > 2400;
       if (idle) {
         // Drift on a slow figure eight across the upper part of the card.
-        s.tx = b.width * (0.6 + 0.24 * Math.sin(s.t * 0.33));
-        s.ty = b.height * (0.34 + 0.14 * Math.sin(s.t * 0.66));
+        s.tx = b.width * (0.5 + 0.3 * Math.sin(s.t * 0.33));
+        s.ty = b.height * ((b.width < 768 ? 0.3 : 0.4) + 0.1 * Math.sin(s.t * 0.66));
       }
       const follow = idle ? 0.03 : 0.16;
       s.x += (s.tx - s.x) * follow;
@@ -220,7 +220,7 @@ export default function Hero({ ignited }: { ignited: boolean }) {
         </div>
 
         {/* Old world (surface), cut away by the lens. */}
-        <div ref={old} className="absolute inset-0">
+        <div ref={old} className="absolute inset-0 bg-[#121211]">
           <OldWorld />
         </div>
 
@@ -264,12 +264,12 @@ export default function Hero({ ignited }: { ignited: boolean }) {
                   </span>
                 </a>
                 <a
-                  href="#offerings"
+                  href="#process"
                   className="btn-secondary"
                   data-cursor="View"
-                  onClick={(e) => (e.preventDefault(), scrollToTarget('#offerings'))}
+                  onClick={(e) => (e.preventDefault(), scrollToTarget('#process'))}
                 >
-                  See the catalog
+                  How we work
                 </a>
               </div>
             </div>

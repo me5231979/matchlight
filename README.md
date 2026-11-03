@@ -29,10 +29,10 @@ Or import the GitHub repo in the Vercel dashboard. No environment variables are 
 | Path | What it is |
 |---|---|
 | `src/components/Preloader.tsx` | The Strike: line draws, spark flares, radial ignite reveal. Skipped on repeat visits and reduced motion. |
-| `src/components/Hero.tsx`, `HeroWorlds.tsx` | Two worlds in one frame. The surface is L&D today (gray, on a loop). The cursor is a match: an ember lens burns through to the new world of work underneath. Lens drifts on its own with no cursor; scrolling out widens it until the old world is gone. |
+| `src/components/Hero.tsx`, `HeroWorlds.tsx` | Two worlds in one frame. The surface is the classroom: one slide broadcast to rows of seats, an LMS sidebar, a completion certificate. Underneath is the floor of the work: a lit horizon, people out of their seats in a live sim, coached by AI, shipping. The cursor is a match whose ember lens burns through. It drifts on its own with no cursor; scrolling out widens it until the old world is gone. |
 | `src/components/SparkField.tsx` | WebGL ember particles (custom GLSL, one draw call). Desktop only, lazy loaded after first paint. Phones get a CSS glow. |
 | `src/components/BurnSection.tsx` | Seat time. Completions. Smile sheets. Hours logged. burn away through an SVG noise threshold with Ember edges and ash, then *Capability.* rises. |
-| `src/components/Offerings.tsx` | Sticky stacking cards (after MotionSites `nimbus-sticky-cards`). |
+| `src/components/Offerings.tsx` | What we do: Consult, Build, Partner as sticky stacking cards (after MotionSites `nimbus-sticky-cards`). |
 | `src/components/StrikeProcess.tsx` | Pinned horizontal track; a strike line lights Strike, First light, Shape, Ship. Vertical on mobile. |
 | `src/components/Beliefs.tsx` | Five beliefs, scrubbed blur-to-sharp reveal with weight and tracking shifts, ellipse wipe entry. |
 | `src/components/ProofStrip.tsx` | **Placeholder** marquee. Replace with real logos or build screenshots. |
@@ -56,4 +56,4 @@ Or import the GitHub repo in the Vercel dashboard. No environment variables are 
 - `hello@matchlight.ai` contact address (Nav, CTA, Footer).
 - LinkedIn link in the footer points to linkedin.com.
 - Proof strip entries.
-- Numbers in the hero's new-world cards (1,284 practicing, +38%, shipped in 6 days) are illustrative.
+- Scenes and numbers in the hero and service cards (shipped day 9, capability map gaps) are illustrative.

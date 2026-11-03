@@ -14,7 +14,7 @@ export const problem = {
 };
 
 export type Offering = {
-  id: string;
+  id: 'consult' | 'build' | 'partner';
   num: string;
   label: string;
   title: string;
@@ -22,40 +22,39 @@ export type Offering = {
   copy: string;
   deliverables: string[];
   cta: string;
-  price?: string;
 };
 
+/** Three service lines. Consultancy and development, scoped per engagement. */
 export const offerings: Offering[] = [
   {
-    id: 'studio',
+    id: 'consult',
     num: '01',
-    label: 'Studio',
-    title: 'Matchlight Studio',
-    audience: 'For organizations',
-    copy: 'Custom capability builds and consulting. Simulations, interactive experiences, learning platforms, sites, and media. Scoped with you, built by us.',
-    deliverables: ['Hosted site', 'SCORM package', 'Code you own'],
+    label: 'Consult',
+    title: 'Capability consulting',
+    audience: 'Find the real gap',
+    copy: 'We work with your leaders to define what people need to be able to do, where they fall short today, and how you will know it changed. Scoped in one conversation.',
+    deliverables: ['Capability map', 'Build plan', 'Measures that matter'],
+    cta: 'Talk to us',
+  },
+  {
+    id: 'build',
+    num: '02',
+    label: 'Build',
+    title: 'Custom builds',
+    audience: 'Practice, not slides',
+    copy: 'Simulations, interactive experiences, AI practice partners, platforms, sites, and media. Designed and developed by our team, with a working version in days.',
+    deliverables: ['Simulations', 'Platforms', 'AI coaches', 'Media'],
     cta: 'Start a build',
   },
   {
-    id: 'matchbook',
-    num: '02',
-    label: 'Matchbook',
-    title: 'Matchbook',
-    audience: 'For teams',
-    copy: 'Ready-to-run courses on the skills that matter now. Buy it. Run it this week.',
-    deliverables: ['LMS-ready file', 'Classroom version', 'Facilitator guide'],
-    cta: 'See the catalog',
-    price: '$99',
-  },
-  {
-    id: 'academy',
+    id: 'partner',
     num: '03',
-    label: 'Academy',
-    title: 'Matchlight Academy',
-    audience: 'For individuals',
-    copy: 'Open-enrollment programs for people who want to build real capability on their own terms. Cohort-based, practical, and built for the work that’s coming.',
-    deliverables: ['Cohort-based', 'Practical', 'Open enrollment'],
-    cta: 'Join a cohort',
+    label: 'Partner',
+    title: 'Ship it and own it',
+    audience: 'Built to hand over',
+    copy: 'We deliver as a hosted site, a SCORM package, or the full repo, then stay on as your development partner for as long as it helps.',
+    deliverables: ['Hosted site', 'SCORM package', 'Full repo'],
+    cta: 'Plan an engagement',
   },
 ];
 
@@ -76,8 +75,8 @@ export const beliefs = [
 ];
 
 export const navLinks = [
-  { id: 'studio', label: 'Studio', href: '#offerings', preview: 'Custom capability builds. Simulations, platforms, sites, media.' },
-  { id: 'matchbook', label: 'Matchbook', href: '#offerings', preview: '$99 courses. LMS file, classroom version, facilitator guide.' },
-  { id: 'academy', label: 'Academy', href: '#offerings', preview: 'Open-enrollment cohorts for individuals.' },
-  { id: 'how', label: 'How it works', href: '#process', preview: 'Strike. First light. Shape. Ship.' },
+  { id: 'services', label: 'Services', href: '#offerings', preview: 'Consulting, custom builds, and a development partner that hands it over.' },
+  { id: 'how', label: 'How we work', href: '#process', preview: 'Strike. First light. Shape. Ship.' },
+  { id: 'beliefs', label: 'Beliefs', href: '#beliefs', preview: 'Capability is the outcome. Everything else is overhead.' },
+  { id: 'contact', label: 'Contact', href: '#cta', preview: 'One conversation to scope it. A working version in days.' },
 ];

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, BookOpen, FileArchive, Presentation, Users } from 'lucide-react';
+import { ArrowRight, GitBranch, Globe, Package, Target } from 'lucide-react';
 import { gsap, scrollToTarget, afterIdle } from '../lib/motion';
 import { offerings, type Offering } from '../lib/content';
 
@@ -42,17 +42,61 @@ function StudioVisual() {
   );
 }
 
-function MatchbookVisual() {
+/** Consult: a capability map. Where people are today against what the work needs. */
+function ConsultVisual() {
+  const rows = [
+    { skill: 'Lead a hard conversation', now: 0.34, need: 0.8 },
+    { skill: 'Price with confidence', now: 0.52, need: 0.85 },
+    { skill: 'Coach in the moment', now: 0.22, need: 0.7 },
+    { skill: 'Run a clean handoff', now: 0.61, need: 0.75 },
+  ];
+  return (
+    <div className="flex h-full flex-col rounded-xl border border-line bg-ink/60 p-5">
+      <div className="flex items-center justify-between">
+        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ash">Capability map · Field sales managers</span>
+        <Target size={18} strokeWidth={1.5} className="text-bone/70" aria-hidden />
+      </div>
+      <ul className="mt-6 flex flex-1 flex-col justify-center gap-5">
+        {rows.map((r) => (
+          <li key={r.skill}>
+            <div className="mb-2 flex justify-between text-[13px]">
+              <span className="text-bone/85">{r.skill}</span>
+              <span className="font-mono text-[11px] text-ash">gap {Math.round((r.need - r.now) * 100)}</span>
+            </div>
+            <div className="relative h-1.5 w-full rounded-full bg-bone/10">
+              <div className="absolute inset-y-0 left-0 rounded-full bg-bone/35" style={{ width: `${r.now * 100}%` }} />
+              <div className="absolute -top-1 h-3.5 w-px bg-bone/80" style={{ left: `${r.need * 100}%` }} />
+            </div>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-6 flex justify-between text-[12px] text-ash">
+        <span>Today</span>
+        <span>What the work needs</span>
+      </div>
+    </div>
+  );
+}
+
+/** Partner: one build, delivered three ways, and a team that stays on. */
+function PartnerVisual() {
   const items = [
-    { icon: FileArchive, label: 'LMS file', meta: 'SCORM 1.2 · 2004' },
-    { icon: Presentation, label: 'Classroom version', meta: 'Slides + exercises' },
-    { icon: BookOpen, label: 'Facilitator guide', meta: 'Run it this week' },
+    { icon: Globe, label: 'Hosted site', meta: 'We run it for you' },
+    { icon: Package, label: 'SCORM package', meta: 'Drops into your LMS' },
+    { icon: GitBranch, label: 'Full repo', meta: 'Your code, your team' },
   ];
   return (
     <div className="flex h-full flex-col justify-between gap-4">
-      <div className="flex items-baseline gap-3">
-        <span className="font-mono text-[64px] font-medium leading-none tracking-[-0.02em] text-bone md:text-[96px]">$99</span>
-        <span className="label text-ash">per course</span>
+      <div className="rounded-xl border border-line bg-ink/60 p-4 font-mono text-[12px] leading-relaxed text-ash">
+        <p>
+          <span className="text-bone/80">v1.0</span> shipped · day 9
+        </p>
+        <p>
+          <span className="text-bone/80">v1.1</span> new scenarios from field feedback
+        </p>
+        <p>
+          <span className="text-bone/80">v1.2</span> your team extends it, we review
+        </p>
       </div>
       <ul className="grid gap-3 sm:grid-cols-3">
         {items.map(({ icon: Icon, label, meta }) => (
@@ -67,28 +111,8 @@ function MatchbookVisual() {
   );
 }
 
-function AcademyVisual() {
-  return (
-    <div className="flex h-full flex-col justify-between rounded-xl border border-line bg-ink/60 p-5">
-      <div className="flex items-center justify-between">
-        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-ash">Cohort 04 · Open</span>
-        <Users size={18} strokeWidth={1.5} className="text-bone/70" aria-hidden />
-      </div>
-      <div className="grid grid-cols-8 gap-2 py-6">
-        {Array.from({ length: 24 }).map((_, i) => (
-          <span key={i} className={`aspect-square rounded-full ${i < 17 ? 'bg-bone/25' : 'border border-bone/15'}`} />
-        ))}
-      </div>
-      <div className="flex items-center justify-between text-[13px] text-ash">
-        <span>6 weeks · live practice</span>
-        <span>7 seats left</span>
-      </div>
-    </div>
-  );
-}
-
 function Card({ o, active }: { o: Offering; active: boolean }) {
-  const Visual = o.id === 'studio' ? StudioVisual : o.id === 'matchbook' ? MatchbookVisual : AcademyVisual;
+  const Visual = o.id === 'consult' ? ConsultVisual : o.id === 'build' ? StudioVisual : PartnerVisual;
   return (
     <article
       data-offer-card
@@ -137,7 +161,7 @@ function Card({ o, active }: { o: Offering; active: boolean }) {
 }
 
 /**
- * Three ways in. Based on nimbus-sticky-cards: cards rise and stack as you
+ * What we do. Based on nimbus-sticky-cards: cards rise and stack as you
  * scroll, tilting into place. Behind cards dim, the active card gets an
  * Ember edge. Mobile and reduced motion get a plain stacked list.
  */
@@ -189,9 +213,9 @@ export default function Offerings() {
       <div className="wrap flex h-full flex-col py-24 lg:py-0 lg:pt-28">
         <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-end lg:mb-8">
           <h2 id="offerings-title" className="text-[40px] font-semibold leading-[1.05] tracking-[-0.025em] text-bone md:text-h1">
-            Three ways in.
+            What we do.
           </h2>
-          <p className="max-w-sm text-ash">Build with us, run our courses, or join a program. Same standard either way.</p>
+          <p className="max-w-sm text-ash">A consultancy and development studio. We find the gap, build what closes it, and hand it over.</p>
         </div>
         <div ref={stack} className={pinned ? 'relative min-h-0 flex-1 pb-10' : 'flex flex-col gap-6'}>
           {offerings.map((o, i) => (

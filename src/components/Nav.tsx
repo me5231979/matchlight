@@ -23,14 +23,6 @@ export function Wordmark({ className = '' }: { className?: string }) {
 
 /** Small abstract preview for each overlay link (Unseen Studio style). */
 function Preview({ id }: { id: string }) {
-  if (id === 'matchbook')
-    return (
-      <div className="flex h-full flex-col justify-between p-6">
-        <span className="label text-ash">02 / Matchbook</span>
-        <span className="font-mono text-[72px] leading-none text-bone">$99</span>
-        <span className="text-sm text-bone/70">LMS file · Classroom version · Facilitator guide</span>
-      </div>
-    );
   if (id === 'how')
     return (
       <div className="flex h-full flex-col justify-center gap-6 p-6">
@@ -43,26 +35,36 @@ function Preview({ id }: { id: string }) {
         </div>
       </div>
     );
+  if (id === 'beliefs')
+    return (
+      <div className="flex h-full flex-col justify-between p-6">
+        <span className="label text-ash">What we believe</span>
+        <p className="text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] text-bone">
+          If it can’t be <span className="accent">practiced,</span> it won’t stick.
+        </p>
+        <span className="text-sm text-ash">02 of 05</span>
+      </div>
+    );
+  if (id === 'contact')
+    return (
+      <div className="flex h-full flex-col justify-between p-6">
+        <span className="label text-ash">Start a build</span>
+        <p className="text-[34px] font-semibold leading-[1.08] tracking-[-0.02em] text-bone">One conversation to scope it.</p>
+        <span className="text-sm text-bone/70">hello@matchlight.ai</span>
+      </div>
+    );
   return (
     <div className="flex h-full flex-col justify-between p-6">
-      <span className="label text-ash">{id === 'studio' ? '01 / Studio' : '03 / Academy'}</span>
-      <div className="grid grid-cols-3 gap-2">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div
-            key={i}
-            className="aspect-[4/3] rounded-md border border-line"
-            style={{
-              background:
-                i === (id === 'studio' ? 1 : 4)
-                  ? 'radial-gradient(circle at 30% 70%, rgba(255,90,31,0.55), rgba(28,27,25,1) 70%)'
-                  : 'linear-gradient(160deg, #26241f, #1C1B19)',
-            }}
-          />
+      <span className="label text-ash">Services</span>
+      <ul className="space-y-3">
+        {['Consult', 'Build', 'Partner'].map((t, i) => (
+          <li key={t} className="flex items-baseline gap-4 border-b border-line pb-3">
+            <span className="font-mono text-xs text-ash">0{i + 1}</span>
+            <span className="text-[26px] font-semibold tracking-[-0.02em] text-bone">{t}</span>
+          </li>
         ))}
-      </div>
-      <span className="text-sm text-bone/70">
-        {id === 'studio' ? 'Simulations · Platforms · Sites · Media' : 'Cohorts for individuals'}
-      </span>
+      </ul>
+      <span className="text-sm text-bone/70">Simulations · Platforms · AI coaches · Sites · Media</span>
     </div>
   );
 }

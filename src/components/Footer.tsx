@@ -2,9 +2,9 @@ import { useEffect, useRef } from 'react';
 import { gsap, afterIdle } from '../lib/motion';
 
 const columns = [
-  { title: 'Studio', links: ['Custom builds', 'Consulting', 'Simulations', 'Platforms'] },
-  { title: 'Matchbook', links: ['Catalog', 'LMS files', 'Classroom versions', 'Facilitator guides'] },
-  { title: 'Academy', links: ['Programs', 'Cohorts', 'Enroll'] },
+  { title: 'Services', links: [['Capability consulting', '#offerings'], ['Custom builds', '#offerings'], ['Development partner', '#offerings']] },
+  { title: 'We build', links: [['Simulations', '#offerings'], ['AI practice partners', '#offerings'], ['Platforms and sites', '#offerings']] },
+  { title: 'Studio', links: [['How we work', '#process'], ['What we believe', '#beliefs'], ['Start a build', '#cta']] },
 ];
 
 /**
@@ -50,9 +50,9 @@ export default function Footer() {
             <div key={c.title}>
               <p className="label mb-4 text-ash">{c.title}</p>
               <ul className="space-y-2.5 text-[15px] text-bone/80">
-                {c.links.map((l) => (
+                {c.links.map(([l, href]) => (
                   <li key={l}>
-                    <a href="#offerings" className="link-strike hover:text-bone">
+                    <a href={href} className="link-strike hover:text-bone">
                       {l}
                     </a>
                   </li>

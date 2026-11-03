@@ -241,56 +241,84 @@
   100% { transform: translate3d(14px, -85vh, 0); opacity: 0; }
 }
 
-/* ---------- Hero: old world (mechanical, same pace forever) ---------- */
-.old-row {
-  animation-name: old-march;
-  animation-timing-function: steps(24, end);
-  animation-iteration-count: infinite;
+/* ---------- Hero: old world (the classroom) ---------- */
+.old-doze {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: doze 7s ease-in-out infinite;
 }
-@keyframes old-march {
-  to {
-    transform: translateX(-33.333%);
-  }
+@keyframes doze {
+  0%, 60%, 100% { transform: translateY(0) rotate(0); }
+  70%, 88% { transform: translateY(5px) rotate(8deg); }
+}
+.old-tick {
+  transform-origin: 0 0;
+  animation: tick 60s steps(60, end) infinite;
+}
+@keyframes tick {
+  to { transform: rotate(360deg); }
 }
 
-/* ---------- Hero: new world (alive) ---------- */
-.graph-edge {
-  stroke-dasharray: 600;
-  stroke-dashoffset: 600;
-  animation: edge-draw 4.5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
-}
-@keyframes edge-draw {
-  0% { stroke-dashoffset: 600; opacity: 0; }
-  15% { opacity: 1; }
-  60% { stroke-dashoffset: 0; opacity: 1; }
-  100% { stroke-dashoffset: 0; opacity: 0.15; }
-}
-.graph-node {
+/* ---------- Hero: new world (the floor of the work) ---------- */
+.new-sun {
   transform-box: fill-box;
   transform-origin: center;
-  animation: node-pulse 2.4s ease-in-out infinite;
-  filter: drop-shadow(0 0 6px rgba(255, 181, 71, 0.9));
+  animation: sun 5s ease-in-out infinite alternate;
 }
-@keyframes node-pulse {
-  0%, 100% { transform: scale(0.7); opacity: 0.6; }
-  50% { transform: scale(1.4); opacity: 1; }
+@keyframes sun {
+  to { transform: scale(1.25); opacity: 0.3; }
 }
-.new-bar {
-  height: 30%;
-  animation: bar-live 1.4s ease-in-out infinite alternate;
+.floor-pulse {
+  stroke-dasharray: 60 1400;
+  stroke-dashoffset: 0;
+  animation: floor-pulse 3.5s cubic-bezier(0.5, 0, 0.9, 0.6) infinite;
+  opacity: 0.85;
 }
-@keyframes bar-live {
-  to { height: 100%; }
+@keyframes floor-pulse {
+  from { stroke-dashoffset: 0; }
+  to { stroke-dashoffset: -1400; }
 }
-.new-meter {
-  width: 20%;
-  animation: meter-fill 5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+.flow-dash {
+  stroke-dasharray: 40 520;
+  animation: flow 3s linear infinite;
 }
-@keyframes meter-fill {
-  0% { width: 18%; }
-  55%, 100% { width: 78%; }
+@keyframes flow {
+  to { stroke-dashoffset: -560; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .new-meter { width: 78%; }
-  .graph-edge { stroke-dashoffset: 0; }
+.coach-orb {
+  animation: orb 3.2s ease-in-out infinite;
+}
+@keyframes orb {
+  50% { transform: translate(6px, -10px); }
+}
+.new-bob {
+  transform-box: fill-box;
+  animation: bob 1.6s ease-in-out infinite alternate;
+}
+@keyframes bob {
+  to { transform: translateY(-4px); }
+}
+.holo {
+  animation: holo 6s ease-in-out infinite alternate;
+}
+@keyframes holo {
+  to { opacity: 0.86; }
+}
+.walker {
+  animation: walk linear infinite;
+}
+.walker-r {
+  animation-direction: reverse;
+}
+@keyframes walk {
+  0% { transform: translateX(-260px); opacity: 0; }
+  10%, 90% { opacity: 1; }
+  100% { transform: translateX(260px); opacity: 0; }
+}
+.new-meter-svg {
+  animation: meter-svg 5s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+@keyframes meter-svg {
+  0% { width: 30px; }
+  55%, 100% { width: 150px; }
 }
